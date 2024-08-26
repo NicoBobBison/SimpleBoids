@@ -12,13 +12,14 @@ namespace BoidsSimulator
 {
     internal class Boid
     {
-        Vector2 _position = new Vector2(100, 100);
+        Vector2 _position;
         Vector2 _velocity;
         Texture2D _texture;
-        public Boid(Texture2D texture)
+        public Boid(Texture2D texture, Vector2 position, Vector2 initialVelocity)
         {
             _texture = texture;
-            _velocity = new Vector2(150, 150);
+            _velocity = initialVelocity;
+            _position = position;
         }
         public void Update(GameTime gameTime)
         {
@@ -29,6 +30,9 @@ namespace BoidsSimulator
         {
             spriteBatch.Draw(_texture, _position, null, Color.White, Helper.GetRotationAroundZero(_velocity) + Helper.DegToRad(90f), Vector2.Zero, 1.0f, SpriteEffects.None, 0);
         }
+        /// <summary>
+        /// Wraps boid around screen by teleporting it to the other side when it hits an edge. Uses padding to hide teleportation
+        /// </summary>
         void WrapAroundScreen()
         {
             if(_position.X < -Game1.ScreenPadding.X)

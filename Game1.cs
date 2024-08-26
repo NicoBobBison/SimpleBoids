@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
 
 namespace BoidsSimulator
@@ -43,11 +44,8 @@ namespace BoidsSimulator
 
             // TODO: use this.Content to load your game content here
             _boidTexture = Content.Load<Texture2D>("Sprites/boid");
-            _boids = new List<Boid>()
-            {
-                new Boid(_boidTexture) 
-            };
-
+            _boids = new List<Boid>();
+            SpawnBoids(30);
         }
 
         protected override void Update(GameTime gameTime)
@@ -76,6 +74,15 @@ namespace BoidsSimulator
             }
             _spriteBatch.End();
             base.Draw(gameTime);
+        }
+        void SpawnBoids(int numBoids)
+        {
+            Random random = new Random();
+            for(int i = 0; i < numBoids; i++)
+            {
+                Vector2 randPos = new Vector2(random.Next(0, (int)ScreenSize.X), random.Next(0, (int)ScreenSize.Y));
+                _boids.Add(new Boid(_boidTexture, randPos, new Vector2(250, 0)));
+            }
         }
     }
 }
