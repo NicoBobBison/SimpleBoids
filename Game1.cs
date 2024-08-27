@@ -12,7 +12,7 @@ namespace BoidsSimulator
     {
         #region Constants
         public static readonly Vector2 ScreenSize = new Vector2(1600, 900);
-        public static readonly Vector2 ScreenPadding = new Vector2(30, 30); // How far boids can travel outside of the screen size
+        public static readonly Vector2 ScreenMargin = new Vector2(70, 70); // How close boids can get to the screen edge before being pushed inwards
         #endregion
 
         private Texture2D _boidTexture;
@@ -45,7 +45,7 @@ namespace BoidsSimulator
 
             // TODO: use this.Content to load your game content here
             _boidTexture = Content.Load<Texture2D>("Sprites/boid");
-            SpawnBoids(100);
+            SpawnBoids(200);
 
             Boid debuggedBoid = GetRandomBoid();
             debuggedBoid.VisionDebug = true;

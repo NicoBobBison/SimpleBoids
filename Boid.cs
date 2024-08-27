@@ -15,13 +15,15 @@ namespace BoidsSimulator
     {
         #region Constants
         public const float BoidVisionRange = 100f;
-        public const float BoidSeparationMultiplier = 0.4f;
+        public const float BoidSeparationRange = 30f;
+        public const float BoidSeparationMultiplier = 0.3f;
         public const float BoidAlignmentMultiplier = 0.1f;
-        public const float BoidCohesionMultiplier = 0.02f;
+        public const float BoidCohesionMultiplier = 0.06f;
 
         public const float BoidMinSpeed = 100f;
-        public const float BoidMaxSpeed = 300;
-        public const float BoidMaxAcceleration = 30f;
+        public const float BoidMaxSpeed = 600f;
+        public const float BoidMaxAcceleration = 20f;
+        public const float BoidEdgeTurnSpeed = 1000f;
         #endregion
 
         public Vector2 Position;
@@ -48,7 +50,8 @@ namespace BoidsSimulator
             Velocity += _acceleration * Helper.GetDeltaTime(gameTime);
             _acceleration = RecalculateAcceleration() * BoidMaxAcceleration;
             Velocity = Helper.ClampVectorMagnitude(Velocity, BoidMinSpeed, BoidMaxSpeed);
-            WrapAroundScreen();
+            //WrapAroundScreen();
+            KeepWithinBounds(gameTime);
         }
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -63,6 +66,7 @@ namespace BoidsSimulator
             {
                 List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
                 spriteBatch.DrawLine(Position, Position + CalculateSeparationAcceleration(nearbyBoids), Color.White, 5);
+                spriteBatch.DrawCircle(Position, BoidSeparationRange, 20, Color.Red, 3);
             }
             if (AlignmentDebug)
             {
@@ -100,60 +104,98 @@ namespace BoidsSimulator
         {
             // Take the inverse of the vectors from this boid to all nearby boids and average them
             Vector2 totalDistance = Vector2.Zero;
-            foreach(Boid boid in nearbyBoids)
+            foreach (Boid boid in nearbyBoids)
             {
+                // Skip boids we aren't going to collide with
+                if(Vector2.Distance(Position, boid.Position) > BoidSeparationRange)
+                {
+                    continue;
+                }
                 Vector2 distance = Helper.VectorBetweenPoints(Position, boid.Position);
                 float magOfDistance = Helper.GetMagnitude(distance);
                 float weight = 1 - (magOfDistance / BoidVisionRange);
                 totalDistance += distance * weight;
             }
-            totalDistance /= nearbyBoids.Count;
+            // totalDistance /= nearbyBoids.Count;
             return Helper.InvertVector(totalDistance);
         }
         Vector2 CalculateAlignmentAcceleration(List<Boid> nearbyBoids)
         {
-            float totalRotation = 0;
+            Vector2 totalVel = Vector2.Zero;
+            int validBoidCount = 0;
             foreach(Boid boid in nearbyBoids)
             {
-                totalRotation += Helper.GetRotationAroundZero(boid.Velocity);
+                if(Vector2.Distance(Position, boid.Position) <= BoidSeparationRange)
+                {
+                    continue;
+                }
+                totalVel += boid.Velocity;
+                validBoidCount++;
             }
-            totalRotation /= nearbyBoids.Count;
-            Vector2 desiredDirection = new Vector2((float)Math.Cos(totalRotation), (float)Math.Sin(totalRotation));
-            desiredDirection *= Helper.GetMagnitude(Velocity);
-            return Helper.VectorBetweenPoints(Velocity, desiredDirection);
+            if (validBoidCount == 0)
+                return Vector2.Zero;
+            totalVel /= validBoidCount;
+            return Helper.VectorBetweenPoints(Velocity, totalVel);
         }
         Vector2 CalculateCohesionAcceleration(List<Boid> nearbyBoids)
         {
             Vector2 totalPos = Vector2.Zero;
+            int validBoidCount = 0;
             foreach (Boid boid in nearbyBoids)
             {
+                if (Vector2.Distance(Position, boid.Position) <= BoidSeparationRange)
+                {
+                    continue;
+                }
                 totalPos += boid.Position;
+                validBoidCount++;
             }
-
-            totalPos /= nearbyBoids.Count;
+            if (validBoidCount == 0)
+                return Vector2.Zero;
+            totalPos /= validBoidCount;
             return Helper.VectorBetweenPoints(Position, totalPos);
         }
         /// <summary>
-        /// Wraps boid around screen by teleporting it to the other side when it hits an edge. Uses padding to hide teleportation
+        /// Obsolete. Wraps boid around screen by teleporting it to the other side when it hits an edge. Uses padding to hide teleportation
         /// </summary>
-        void WrapAroundScreen()
+        /*void WrapAroundScreen()
         {
-            if(Position.X < -Game1.ScreenPadding.X)
+            if(Position.X < -Game1.ScreenMargin.X)
             {
-                Position.X = Game1.ScreenSize.X + Game1.ScreenPadding.X;
+                Position.X = Game1.ScreenSize.X + Game1.ScreenMargin.X;
             }
-            if(Position.Y < -Game1.ScreenPadding.Y)
+            if(Position.Y < -Game1.ScreenMargin.Y)
             {
-                Position.Y = Game1.ScreenSize.Y + Game1.ScreenPadding.Y;
+                Position.Y = Game1.ScreenSize.Y + Game1.ScreenMargin.Y;
             }
-            if(Position.X > Game1.ScreenSize.X + Game1.ScreenPadding.X)
+            if(Position.X > Game1.ScreenSize.X + Game1.ScreenMargin.X)
             {
-                Position.X = -Game1.ScreenPadding.X;
+                Position.X = -Game1.ScreenMargin.X;
             }
-            if(Position.Y > Game1.ScreenSize.Y + Game1.ScreenPadding.Y)
+            if(Position.Y > Game1.ScreenSize.Y + Game1.ScreenMargin.Y)
             {
-                Position.Y = -Game1.ScreenPadding.Y;
+                Position.Y = -Game1.ScreenMargin.Y;
             }
+        }*/
+        void KeepWithinBounds(GameTime gameTime)
+        {
+            if (Position.X < Game1.ScreenMargin.X)
+            {
+                Velocity.X += BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
+            }
+            if (Position.Y < Game1.ScreenMargin.Y)
+            {
+                Velocity.Y += BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
+            }
+            if (Position.X > Game1.ScreenSize.X - Game1.ScreenMargin.X)
+            {
+                Velocity.X -= BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
+            }
+            if (Position.Y > Game1.ScreenSize.Y - Game1.ScreenMargin.Y)
+            {
+                Velocity.Y -= BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
+            }
+
         }
         List<Boid> GetBoidsWithinVisionRange()
         {
