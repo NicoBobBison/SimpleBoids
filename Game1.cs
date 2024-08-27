@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace BoidsSimulator
 {
@@ -11,14 +12,23 @@ namespace BoidsSimulator
     {
         #region Constants
         public static readonly Vector2 ScreenSize = new Vector2(1600, 900);
-        public static readonly Vector2 ScreenPadding = new Vector2(20, 20); // How far boids can travel outside of the screen size
+        public static readonly Vector2 ScreenPadding = new Vector2(30, 30); // How far boids can travel outside of the screen size
+
+        public const float BoidVisionRange = 100f;
+        public const float BoidSeparationMultiplier = 0.3f;
+        public const float BoidAlignmentMultiplier = 0.3f;
+        public const float BoidCohesionMultiplier = 0.3f;
+
+        public const float BoidMinSpeed = 10f;
+        public const float BoidMaxSpeed = 300f;
+        public const float BoidMaxAcceleration = 40f;
         #endregion
 
         private Texture2D _boidTexture;
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private List<Boid> _boids;
+        public static readonly List<Boid> AllBoids = new List<Boid>();
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -44,8 +54,8 @@ namespace BoidsSimulator
 
             // TODO: use this.Content to load your game content here
             _boidTexture = Content.Load<Texture2D>("Sprites/boid");
-            _boids = new List<Boid>();
-            SpawnBoids(30);
+            SpawnBoids(70);
+            GetRandomBoid().DebugEnabled = true;
         }
 
         protected override void Update(GameTime gameTime)
@@ -55,7 +65,7 @@ namespace BoidsSimulator
 
             // TODO: Add your update logic here
 
-            foreach(Boid boid in _boids)
+            foreach(Boid boid in AllBoids)
             {
                 boid.Update(gameTime);
             }
@@ -68,7 +78,7 @@ namespace BoidsSimulator
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
-            foreach(Boid boid in _boids)
+            foreach(Boid boid in AllBoids)
             {
                 boid.Draw(_spriteBatch);
             }
@@ -81,8 +91,14 @@ namespace BoidsSimulator
             for(int i = 0; i < numBoids; i++)
             {
                 Vector2 randPos = new Vector2(random.Next(0, (int)ScreenSize.X), random.Next(0, (int)ScreenSize.Y));
-                _boids.Add(new Boid(_boidTexture, randPos, new Vector2(250, 0)));
+                Vector2 randVel = new Vector2(random.Next((int)BoidMaxSpeed / 4, (int)BoidMaxSpeed), random.Next((int)BoidMaxSpeed / 4, (int)BoidMaxSpeed));
+                AllBoids.Add(new Boid(_boidTexture, randPos, randVel));
             }
+        }
+        Boid GetRandomBoid()
+        {
+            Random random = new Random();
+            return AllBoids[random.Next(0, AllBoids.Count)];
         }
     }
 }
