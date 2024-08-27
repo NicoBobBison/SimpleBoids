@@ -15,13 +15,13 @@ namespace BoidsSimulator
     {
         #region Constants
         public const float BoidVisionRange = 100f;
-        public const float BoidSeparationMultiplier = 0.2f;
+        public const float BoidSeparationMultiplier = 0.4f;
         public const float BoidAlignmentMultiplier = 0.1f;
-        public const float BoidCohesionMultiplier = 0.1f;
+        public const float BoidCohesionMultiplier = 0.02f;
 
         public const float BoidMinSpeed = 100f;
         public const float BoidMaxSpeed = 300;
-        public const float BoidMaxAcceleration = 10f;
+        public const float BoidMaxAcceleration = 30f;
         #endregion
 
         public Vector2 Position;
@@ -95,6 +95,7 @@ namespace BoidsSimulator
 
             return accumulator.Value;
         }
+        // TODO: Figure out why this isn't giving a very strong velocity
         Vector2 CalculateSeparationAcceleration(List<Boid> nearbyBoids)
         {
             // Take the inverse of the vectors from this boid to all nearby boids and average them
@@ -102,23 +103,24 @@ namespace BoidsSimulator
             foreach(Boid boid in nearbyBoids)
             {
                 Vector2 distance = Helper.VectorBetweenPoints(Position, boid.Position);
-                float magOfDistance = Vector2.Distance(Vector2.Zero, distance);
-                //float weight = 1 - (magOfDistance / BoidVisionRange);
-                totalDistance += distance;// * weight;
+                float magOfDistance = Helper.GetMagnitude(distance);
+                float weight = 1 - (magOfDistance / BoidVisionRange);
+                totalDistance += distance * weight;
             }
             totalDistance /= nearbyBoids.Count;
             return Helper.InvertVector(totalDistance);
         }
-        // TODO: this shouldn't match velocity, only direction
         Vector2 CalculateAlignmentAcceleration(List<Boid> nearbyBoids)
         {
-            Vector2 totalVel = Vector2.Zero;
+            float totalRotation = 0;
             foreach(Boid boid in nearbyBoids)
             {
-                totalVel += boid.Velocity;
+                totalRotation += Helper.GetRotationAroundZero(boid.Velocity);
             }
-            totalVel /= nearbyBoids.Count;
-            return Helper.VectorBetweenPoints(Velocity, totalVel);
+            totalRotation /= nearbyBoids.Count;
+            Vector2 desiredDirection = new Vector2((float)Math.Cos(totalRotation), (float)Math.Sin(totalRotation));
+            desiredDirection *= Helper.GetMagnitude(Velocity);
+            return Helper.VectorBetweenPoints(Velocity, desiredDirection);
         }
         Vector2 CalculateCohesionAcceleration(List<Boid> nearbyBoids)
         {

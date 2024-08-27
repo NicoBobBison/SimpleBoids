@@ -45,7 +45,7 @@ namespace BoidsSimulator
 
             // TODO: use this.Content to load your game content here
             _boidTexture = Content.Load<Texture2D>("Sprites/boid");
-            SpawnBoids(70);
+            SpawnBoids(100);
 
             Boid debuggedBoid = GetRandomBoid();
             debuggedBoid.VisionDebug = true;

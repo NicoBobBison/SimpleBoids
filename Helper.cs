@@ -15,11 +15,21 @@ namespace BoidsSimulator
         }
         public static float GetRotationAroundZero(Vector2 vector)
         {
-            return (float)Math.Atan2(vector.Y, vector.X);
+            float angle = (float)Math.Atan2(vector.Y, vector.X);
+            // We want the rotation to always be a positive number
+            if(angle >= 0)
+            {
+                return angle;
+            }
+            return 2 * (float)Math.PI + angle;
         }
         public static float DegToRad(float deg)
         {
             return deg * (float)Math.PI / 180f;
+        }
+        public static float GetMagnitude(Vector2 vector)
+        {
+            return Vector2.Distance(Vector2.Zero, vector);
         }
         public static Vector2 VectorBetweenPoints(Vector2 point1, Vector2 point2)
         {
