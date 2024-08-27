@@ -13,15 +13,6 @@ namespace BoidsSimulator
         #region Constants
         public static readonly Vector2 ScreenSize = new Vector2(1600, 900);
         public static readonly Vector2 ScreenPadding = new Vector2(30, 30); // How far boids can travel outside of the screen size
-
-        public const float BoidVisionRange = 100f;
-        public const float BoidSeparationMultiplier = 0.3f;
-        public const float BoidAlignmentMultiplier = 0.3f;
-        public const float BoidCohesionMultiplier = 0.3f;
-
-        public const float BoidMinSpeed = 10f;
-        public const float BoidMaxSpeed = 300f;
-        public const float BoidMaxAcceleration = 40f;
         #endregion
 
         private Texture2D _boidTexture;
@@ -56,6 +47,11 @@ namespace BoidsSimulator
             _boidTexture = Content.Load<Texture2D>("Sprites/boid");
             SpawnBoids(70);
             GetRandomBoid().DebugEnabled = true;
+
+            AcceleratorAccumulator a = new AcceleratorAccumulator(10);
+            a.AddAccelerationRequest(new Vector2(3, 4));
+            a.AddAccelerationRequest(new Vector2(3, 4));
+            a.AddAccelerationRequest(new Vector2(3, 4));
         }
 
         protected override void Update(GameTime gameTime)
@@ -91,7 +87,7 @@ namespace BoidsSimulator
             for(int i = 0; i < numBoids; i++)
             {
                 Vector2 randPos = new Vector2(random.Next(0, (int)ScreenSize.X), random.Next(0, (int)ScreenSize.Y));
-                Vector2 randVel = new Vector2(random.Next((int)BoidMaxSpeed / 4, (int)BoidMaxSpeed), random.Next((int)BoidMaxSpeed / 4, (int)BoidMaxSpeed));
+                Vector2 randVel = new Vector2(random.Next((int)Boid.BoidMaxSpeed / 4, (int)Boid.BoidMaxSpeed), random.Next((int)Boid.BoidMaxSpeed / 4, (int)Boid.BoidMaxSpeed));
                 AllBoids.Add(new Boid(_boidTexture, randPos, randVel));
             }
         }

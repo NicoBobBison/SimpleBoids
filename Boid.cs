@@ -12,6 +12,17 @@ namespace BoidsSimulator
 {
     public class Boid : IEquatable<Boid>
     {
+        #region Constants
+        public const float BoidVisionRange = 100f;
+        public const float BoidSeparationMultiplier = 0.003f;
+        public const float BoidAlignmentMultiplier = 0.001f;
+        public const float BoidCohesionMultiplier = 0.001f;
+
+        public const float BoidMinSpeed = 0f;
+        public const float BoidMaxSpeed = 300f;
+        public const float BoidMaxAcceleration = 40f;
+        #endregion
+
         public Vector2 Position;
         public Vector2 Velocity = Vector2.Zero;
         public bool DebugEnabled;
@@ -28,8 +39,8 @@ namespace BoidsSimulator
         {
             Position += Velocity * Helper.GetDeltaTime(gameTime);
             Velocity += _acceleration;
-            _acceleration = RecalculateAcceleration() * Game1.BoidMaxAcceleration;
-            Velocity = Helper.ClampVectorMagnitude(Velocity, Game1.BoidMinSpeed, Game1.BoidMaxSpeed);
+            _acceleration = RecalculateAcceleration() * BoidMaxAcceleration;
+            Velocity = Helper.ClampVectorMagnitude(Velocity, BoidMinSpeed, BoidMaxSpeed);
             WrapAroundScreen();
         }
         public void Draw(SpriteBatch spriteBatch)
@@ -37,6 +48,7 @@ namespace BoidsSimulator
             Color color = DebugEnabled ? Color.Red : Color.White;
             spriteBatch.Draw(_texture, Position, null, color, Helper.GetRotationAroundZero(Velocity) + Helper.DegToRad(90f), Vector2.Zero, 1.0f, SpriteEffects.None, 0);
         }
+        // TODO: Use an accumulator to prioritize certain actions (steering away from collision) over others (cohesion)
         Vector2 RecalculateAcceleration()
         {
             List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
@@ -44,12 +56,16 @@ namespace BoidsSimulator
             {
                 return Vector2.Zero;
             }
-            Vector2 separationAcceleration = CalculateSeparationAcceleration(nearbyBoids);
-            Vector2 alignmentAcceleration = CalculateAlignmentAcceleration(nearbyBoids);
-            Vector2 cohesionAcceleration = CalculateCohesionAcceleration(nearbyBoids);
-            return (Game1.BoidSeparationMultiplier * separationAcceleration)
-                + (Game1.BoidAlignmentMultiplier * alignmentAcceleration)
-                + (Game1.BoidCohesionMultiplier * cohesionAcceleration);
+            Vector2 separationAcceleration = CalculateSeparationAcceleration(nearbyBoids) * BoidSeparationMultiplier;
+            Vector2 alignmentAcceleration = CalculateAlignmentAcceleration(nearbyBoids) * BoidAlignmentMultiplier;
+            Vector2 cohesionAcceleration = CalculateCohesionAcceleration(nearbyBoids) * BoidCohesionMultiplier;
+
+            AcceleratorAccumulator accumulator = new AcceleratorAccumulator(BoidMaxAcceleration);
+            accumulator.AddAccelerationRequest(separationAcceleration);
+            accumulator.AddAccelerationRequest(alignmentAcceleration);
+            accumulator.AddAccelerationRequest(cohesionAcceleration);
+
+            return accumulator.Value;
         }
         Vector2 CalculateSeparationAcceleration(List<Boid> nearbyBoids)
         {
@@ -58,7 +74,6 @@ namespace BoidsSimulator
             foreach(Boid boid in nearbyBoids)
             {
                 Vector2 distance = Helper.VectorBetweenPoints(Position, boid.Position);
-                distance = Helper.InvertVector(distance);
                 totalDistance += distance;
             }
             totalDistance /= nearbyBoids.Count;
@@ -66,8 +81,7 @@ namespace BoidsSimulator
             {
                 return Vector2.Zero;
             }
-            totalDistance.Normalize();
-            return totalDistance;
+            return Helper.InvertVector(totalDistance);
         }
         Vector2 CalculateAlignmentAcceleration(List<Boid> nearbyBoids)
         {
@@ -82,7 +96,6 @@ namespace BoidsSimulator
             {
                 return Vector2.Zero;
             }
-            differenceBetweenCurrentVel.Normalize();
             return differenceBetweenCurrentVel;
 
         }
@@ -99,7 +112,6 @@ namespace BoidsSimulator
             {
                 return Vector2.Zero;
             }
-            differenceBetweenCurrentPos.Normalize();
             return differenceBetweenCurrentPos;
 
         }
@@ -130,7 +142,7 @@ namespace BoidsSimulator
             List<Boid> foundBoids = new List<Boid>();
             foreach(Boid boid in Game1.AllBoids)
             {
-                if(Vector2.Distance(Position, boid.Position) <= Game1.BoidVisionRange)
+                if(Vector2.Distance(Position, boid.Position) <= BoidVisionRange)
                     foundBoids.Add(boid);
             }
             return foundBoids;
