@@ -14,10 +14,10 @@ namespace BoidsSimulator
     public class Boid : IEquatable<Boid>
     {
         #region Constants
-        public const float BoidVisionRange = 100;
-        public const float BoidSeparationMultiplier = 0.04f;
+        public const float BoidVisionRange = 100f;
+        public const float BoidSeparationMultiplier = 0.2f;
         public const float BoidAlignmentMultiplier = 0.1f;
-        public const float BoidCohesionMultiplier = 0.01f;
+        public const float BoidCohesionMultiplier = 0.1f;
 
         public const float BoidMinSpeed = 100f;
         public const float BoidMaxSpeed = 300;
@@ -45,7 +45,7 @@ namespace BoidsSimulator
         public void Update(GameTime gameTime)
         {
             Position += Velocity * Helper.GetDeltaTime(gameTime);
-            Velocity += _acceleration;
+            Velocity += _acceleration * Helper.GetDeltaTime(gameTime);
             _acceleration = RecalculateAcceleration() * BoidMaxAcceleration;
             Velocity = Helper.ClampVectorMagnitude(Velocity, BoidMinSpeed, BoidMaxSpeed);
             WrapAroundScreen();
@@ -57,13 +57,17 @@ namespace BoidsSimulator
                 new Vector2(_texture.Width / 2, _texture.Height / 2), 1.0f, SpriteEffects.None, 0);
             if(VisionDebug)
             {
-                spriteBatch.DrawCircle(Position, 1, 2, Color.Red, 4);
                 spriteBatch.DrawCircle(Position, BoidVisionRange, 20, Color.Green, 3);
             }
             if (SeparationDebug)
             {
                 List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
                 spriteBatch.DrawLine(Position, Position + CalculateSeparationAcceleration(nearbyBoids), Color.White, 5);
+            }
+            if (AlignmentDebug)
+            {
+                List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
+                spriteBatch.DrawLine(Position, Position + CalculateAlignmentAcceleration(nearbyBoids), Color.Red, 5);
             }
             if (CohesionDebug)
             {
@@ -91,7 +95,6 @@ namespace BoidsSimulator
 
             return accumulator.Value;
         }
-        // TODO: Change to use a separate, smaller radius for detection (instead of the vision radius)?
         Vector2 CalculateSeparationAcceleration(List<Boid> nearbyBoids)
         {
             // Take the inverse of the vectors from this boid to all nearby boids and average them
@@ -100,12 +103,13 @@ namespace BoidsSimulator
             {
                 Vector2 distance = Helper.VectorBetweenPoints(Position, boid.Position);
                 float magOfDistance = Vector2.Distance(Vector2.Zero, distance);
-                float weight = 1 - (magOfDistance / BoidVisionRange);
-                totalDistance += distance * weight;
+                //float weight = 1 - (magOfDistance / BoidVisionRange);
+                totalDistance += distance;// * weight;
             }
             totalDistance /= nearbyBoids.Count;
             return Helper.InvertVector(totalDistance);
         }
+        // TODO: this shouldn't match velocity, only direction
         Vector2 CalculateAlignmentAcceleration(List<Boid> nearbyBoids)
         {
             Vector2 totalVel = Vector2.Zero;
@@ -115,7 +119,6 @@ namespace BoidsSimulator
             }
             totalVel /= nearbyBoids.Count;
             return Helper.VectorBetweenPoints(Velocity, totalVel);
-
         }
         Vector2 CalculateCohesionAcceleration(List<Boid> nearbyBoids)
         {

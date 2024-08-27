@@ -50,12 +50,8 @@ namespace BoidsSimulator
             Boid debuggedBoid = GetRandomBoid();
             debuggedBoid.VisionDebug = true;
             debuggedBoid.SeparationDebug = true;
+            debuggedBoid.AlignmentDebug = true;
             debuggedBoid.CohesionDebug = true;
-
-            AcceleratorAccumulator a = new AcceleratorAccumulator(10);
-            a.AddAccelerationRequest(new Vector2(3, 4));
-            a.AddAccelerationRequest(new Vector2(3, 4));
-            a.AddAccelerationRequest(new Vector2(3, 4));
         }
 
         protected override void Update(GameTime gameTime)
@@ -91,7 +87,7 @@ namespace BoidsSimulator
             for(int i = 0; i < numBoids; i++)
             {
                 Vector2 randPos = new Vector2(random.Next(0, (int)ScreenSize.X), random.Next(0, (int)ScreenSize.Y));
-                Vector2 randVel = new Vector2(random.Next((int)Boid.BoidMaxSpeed / 4, (int)Boid.BoidMaxSpeed), random.Next((int)Boid.BoidMaxSpeed / 4, (int)Boid.BoidMaxSpeed));
+                Vector2 randVel = new Vector2(random.Next((int)-Boid.BoidMaxSpeed, (int)Boid.BoidMaxSpeed), random.Next((int)-Boid.BoidMaxSpeed, (int)Boid.BoidMaxSpeed));
                 AllBoids.Add(new Boid(_boidTexture, randPos, randVel));
             }
         }
