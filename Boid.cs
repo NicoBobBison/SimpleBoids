@@ -14,12 +14,12 @@ namespace BoidsSimulator
     public class Boid : IEquatable<Boid>
     {
         #region Constants
-        public const float BoidVisionRange = 50;
-        public const float BoidSeparationMultiplier = 0.3f;
+        public const float BoidVisionRange = 100;
+        public const float BoidSeparationMultiplier = 0.04f;
         public const float BoidAlignmentMultiplier = 0.1f;
-        public const float BoidCohesionMultiplier = 0.1f;
+        public const float BoidCohesionMultiplier = 0.01f;
 
-        public const float BoidMinSpeed = 0f;
+        public const float BoidMinSpeed = 100f;
         public const float BoidMaxSpeed = 300;
         public const float BoidMaxAcceleration = 10f;
         #endregion
@@ -91,6 +91,7 @@ namespace BoidsSimulator
 
             return accumulator.Value;
         }
+        // TODO: Change to use a separate, smaller radius for detection (instead of the vision radius)?
         Vector2 CalculateSeparationAcceleration(List<Boid> nearbyBoids)
         {
             // Take the inverse of the vectors from this boid to all nearby boids and average them
@@ -103,10 +104,6 @@ namespace BoidsSimulator
                 totalDistance += distance * weight;
             }
             totalDistance /= nearbyBoids.Count;
-            if(Vector2.Distance(Vector2.Zero, totalDistance) == 0)
-            {
-                return Vector2.Zero;
-            }
             return Helper.InvertVector(totalDistance);
         }
         Vector2 CalculateAlignmentAcceleration(List<Boid> nearbyBoids)
@@ -117,15 +114,9 @@ namespace BoidsSimulator
                 totalVel += boid.Velocity;
             }
             totalVel /= nearbyBoids.Count;
-            Vector2 differenceBetweenCurrentVel = Helper.VectorBetweenPoints(Velocity, totalVel);
-            if (Vector2.Distance(Vector2.Zero, differenceBetweenCurrentVel) == 0)
-            {
-                return Vector2.Zero;
-            }
-            return differenceBetweenCurrentVel;
+            return Helper.VectorBetweenPoints(Velocity, totalVel);
 
         }
-        // TODO: Figure out a way to normalize this (always way too high)
         Vector2 CalculateCohesionAcceleration(List<Boid> nearbyBoids)
         {
             Vector2 totalPos = Vector2.Zero;
@@ -133,14 +124,9 @@ namespace BoidsSimulator
             {
                 totalPos += boid.Position;
             }
-            totalPos /= nearbyBoids.Count;
-            Vector2 differenceBetweenCurrentPos = Helper.VectorBetweenPoints(Position, totalPos);
-            if (Vector2.Distance(Vector2.Zero, differenceBetweenCurrentPos) == 0)
-            {
-                return Vector2.Zero;
-            }
-            return differenceBetweenCurrentPos;
 
+            totalPos /= nearbyBoids.Count;
+            return Helper.VectorBetweenPoints(Position, totalPos);
         }
         /// <summary>
         /// Wraps boid around screen by teleporting it to the other side when it hits an edge. Uses padding to hide teleportation
