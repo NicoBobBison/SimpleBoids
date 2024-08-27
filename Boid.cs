@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,19 +14,25 @@ namespace BoidsSimulator
     public class Boid : IEquatable<Boid>
     {
         #region Constants
-        public const float BoidVisionRange = 100f;
-        public const float BoidSeparationMultiplier = 0.003f;
-        public const float BoidAlignmentMultiplier = 0.001f;
-        public const float BoidCohesionMultiplier = 0.001f;
+        public const float BoidVisionRange = 50;
+        public const float BoidSeparationMultiplier = 0.3f;
+        public const float BoidAlignmentMultiplier = 0.1f;
+        public const float BoidCohesionMultiplier = 0.1f;
 
         public const float BoidMinSpeed = 0f;
-        public const float BoidMaxSpeed = 300f;
-        public const float BoidMaxAcceleration = 40f;
+        public const float BoidMaxSpeed = 300;
+        public const float BoidMaxAcceleration = 10f;
         #endregion
 
         public Vector2 Position;
         public Vector2 Velocity = Vector2.Zero;
-        public bool DebugEnabled;
+
+        #region Debug
+        public bool VisionDebug;
+        public bool SeparationDebug;
+        public bool AlignmentDebug;
+        public bool CohesionDebug;
+        #endregion
 
         Vector2 _acceleration = Vector2.Zero;
         Texture2D _texture;
@@ -45,8 +52,25 @@ namespace BoidsSimulator
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            Color color = DebugEnabled ? Color.Red : Color.White;
-            spriteBatch.Draw(_texture, Position, null, color, Helper.GetRotationAroundZero(Velocity) + Helper.DegToRad(90f), Vector2.Zero, 1.0f, SpriteEffects.None, 0);
+            Color color = VisionDebug ? Color.Red : Color.White;
+            spriteBatch.Draw(_texture, Position, null, color, Helper.GetRotationAroundZero(Velocity) + Helper.DegToRad(90f),
+                new Vector2(_texture.Width / 2, _texture.Height / 2), 1.0f, SpriteEffects.None, 0);
+            if(VisionDebug)
+            {
+                spriteBatch.DrawCircle(Position, 1, 2, Color.Red, 4);
+                spriteBatch.DrawCircle(Position, BoidVisionRange, 20, Color.Green, 3);
+            }
+            if (SeparationDebug)
+            {
+                List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
+                spriteBatch.DrawLine(Position, Position + CalculateSeparationAcceleration(nearbyBoids), Color.White, 5);
+            }
+            if (CohesionDebug)
+            {
+                List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
+                spriteBatch.DrawLine(Position, Position + CalculateCohesionAcceleration(nearbyBoids), Color.Green, 5);
+            }
+
         }
         // TODO: Use an accumulator to prioritize certain actions (steering away from collision) over others (cohesion)
         Vector2 RecalculateAcceleration()
@@ -74,7 +98,9 @@ namespace BoidsSimulator
             foreach(Boid boid in nearbyBoids)
             {
                 Vector2 distance = Helper.VectorBetweenPoints(Position, boid.Position);
-                totalDistance += distance;
+                float magOfDistance = Vector2.Distance(Vector2.Zero, distance);
+                float weight = 1 - (magOfDistance / BoidVisionRange);
+                totalDistance += distance * weight;
             }
             totalDistance /= nearbyBoids.Count;
             if(Vector2.Distance(Vector2.Zero, totalDistance) == 0)
@@ -99,6 +125,7 @@ namespace BoidsSimulator
             return differenceBetweenCurrentVel;
 
         }
+        // TODO: Figure out a way to normalize this (always way too high)
         Vector2 CalculateCohesionAcceleration(List<Boid> nearbyBoids)
         {
             Vector2 totalPos = Vector2.Zero;
@@ -142,7 +169,7 @@ namespace BoidsSimulator
             List<Boid> foundBoids = new List<Boid>();
             foreach(Boid boid in Game1.AllBoids)
             {
-                if(Vector2.Distance(Position, boid.Position) <= BoidVisionRange)
+                if(Vector2.Distance(Position, boid.Position) <= BoidVisionRange && !Equals(boid))
                     foundBoids.Add(boid);
             }
             return foundBoids;

@@ -46,7 +46,11 @@ namespace BoidsSimulator
             // TODO: use this.Content to load your game content here
             _boidTexture = Content.Load<Texture2D>("Sprites/boid");
             SpawnBoids(70);
-            GetRandomBoid().DebugEnabled = true;
+
+            Boid debuggedBoid = GetRandomBoid();
+            debuggedBoid.VisionDebug = true;
+            debuggedBoid.SeparationDebug = true;
+            debuggedBoid.CohesionDebug = true;
 
             AcceleratorAccumulator a = new AcceleratorAccumulator(10);
             a.AddAccelerationRequest(new Vector2(3, 4));
