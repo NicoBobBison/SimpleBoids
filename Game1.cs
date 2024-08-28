@@ -15,11 +15,18 @@ namespace BoidsSimulator
         public static readonly Vector2 ScreenMargin = new Vector2(125, 125); // How close boids can get to the screen edge before being pushed inwards
         #endregion
 
+        // If true, will choose a random boid to debug
+        bool _debugBoid = false;
+
         private Texture2D _boidTexture;
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         public static readonly List<Boid> AllBoids = new List<Boid>();
+
+        private KeyboardState _currentState;
+        private KeyboardState _previousState;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -45,18 +52,18 @@ namespace BoidsSimulator
 
             // TODO: use this.Content to load your game content here
             _boidTexture = Content.Load<Texture2D>("Sprites/boid");
-            SpawnBoids(200);
 
-            Boid debuggedBoid = GetRandomBoid();
-            debuggedBoid.VisionDebug = true;
-            debuggedBoid.SeparationDebug = true;
-            debuggedBoid.AlignmentDebug = true;
-            debuggedBoid.CohesionDebug = true;
-            Boid.IDCount = 0;
+            RestartSimulation();
+
+            _currentState = Keyboard.GetState();
+            _previousState = _currentState;
         }
 
         protected override void Update(GameTime gameTime)
         {
+            _previousState = _currentState;
+            _currentState = Keyboard.GetState();
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -65,6 +72,11 @@ namespace BoidsSimulator
             foreach(Boid boid in AllBoids)
             {
                 boid.Update(gameTime);
+            }
+            if(_currentState.IsKeyDown(Keys.R) && _previousState.IsKeyUp(Keys.R))
+            {
+                // Restart simulation
+                RestartSimulation();
             }
             base.Update(gameTime);
         }
@@ -81,6 +93,21 @@ namespace BoidsSimulator
             }
             _spriteBatch.End();
             base.Draw(gameTime);
+        }
+        void RestartSimulation()
+        {
+            AllBoids.Clear();
+            Boid.IDCount = 0;
+            SpawnBoids(200);
+
+            if (_debugBoid)
+            {
+                Boid debuggedBoid = GetRandomBoid();
+                debuggedBoid.VisionDebug = true;
+                debuggedBoid.SeparationDebug = true;
+                debuggedBoid.AlignmentDebug = true;
+                debuggedBoid.CohesionDebug = true;
+            }
         }
         void SpawnBoids(int numBoids)
         {

@@ -23,7 +23,7 @@ namespace BoidsSimulator
         public const float BoidMinSpeed = 450f;
         public const float BoidMaxSpeed = 600f;
         public const float BoidMaxAcceleration = 40f;
-        public const float BoidEdgeTurnSpeed = 2500f;
+        public const float BoidEdgeTurnSpeed = 80f;
         public const float BoidGravityAcceleration = 10f;
         #endregion
 
@@ -49,9 +49,10 @@ namespace BoidsSimulator
         }
         public void Update(GameTime gameTime)
         {
+            // TODO: Figure out when I actually have to multiply by delta time
             _acceleration = RecalculateAcceleration() * BoidMaxAcceleration;
             Velocity = Helper.ClampVectorMagnitude(Velocity, BoidMinSpeed, BoidMaxSpeed);
-            _acceleration.Y += BoidGravityAcceleration * Helper.GetDeltaTime(gameTime);
+            _acceleration.Y += BoidGravityAcceleration;
             KeepWithinBounds(gameTime);
 
             //WrapAroundScreen();
@@ -183,19 +184,19 @@ namespace BoidsSimulator
         {
             if (Position.X < Game1.ScreenMargin.X)
             {
-                Velocity.X += BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
+                Velocity.X += BoidEdgeTurnSpeed;
             }
             else if (Position.X > Game1.ScreenSize.X - Game1.ScreenMargin.X)
             {
-                Velocity.X -= BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
+                Velocity.X -= BoidEdgeTurnSpeed;
             }
             if (Position.Y < Game1.ScreenMargin.Y)
             {
-                Velocity.Y += BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
+                Velocity.Y += BoidEdgeTurnSpeed;
             }
             else if (Position.Y > Game1.ScreenSize.Y - Game1.ScreenMargin.Y)
             {
-                Velocity.Y -= BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
+                Velocity.Y -= BoidEdgeTurnSpeed;
             }
         }
         List<Boid> GetBoidsWithinVisionRange()
