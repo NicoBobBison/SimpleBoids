@@ -24,6 +24,7 @@ namespace BoidsSimulator
         public const float BoidMaxSpeed = 600f;
         public const float BoidMaxAcceleration = 40f;
         public const float BoidEdgeTurnSpeed = 2500f;
+        public const float BoidGravityAcceleration = 10f;
         #endregion
 
         public Vector2 Position;
@@ -50,6 +51,7 @@ namespace BoidsSimulator
         {
             _acceleration = RecalculateAcceleration() * BoidMaxAcceleration;
             Velocity = Helper.ClampVectorMagnitude(Velocity, BoidMinSpeed, BoidMaxSpeed);
+            _acceleration.Y += BoidGravityAcceleration * Helper.GetDeltaTime(gameTime);
             KeepWithinBounds(gameTime);
 
             //WrapAroundScreen();
@@ -117,7 +119,6 @@ namespace BoidsSimulator
                 Vector2 distance = Helper.VectorBetweenPoints(Position, boid.Position);
                 totalDistance += distance;
             }
-            // totalDistance /= nearbyBoids.Count;
             return Helper.InvertVector(totalDistance);
         }
         Vector2 CalculateAlignmentAcceleration(List<Boid> nearbyBoids)
@@ -184,19 +185,18 @@ namespace BoidsSimulator
             {
                 Velocity.X += BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
             }
+            else if (Position.X > Game1.ScreenSize.X - Game1.ScreenMargin.X)
+            {
+                Velocity.X -= BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
+            }
             if (Position.Y < Game1.ScreenMargin.Y)
             {
                 Velocity.Y += BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
             }
-            if (Position.X > Game1.ScreenSize.X - Game1.ScreenMargin.X)
-            {
-                Velocity.X -= BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
-            }
-            if (Position.Y > Game1.ScreenSize.Y - Game1.ScreenMargin.Y)
+            else if (Position.Y > Game1.ScreenSize.Y - Game1.ScreenMargin.Y)
             {
                 Velocity.Y -= BoidEdgeTurnSpeed * Helper.GetDeltaTime(gameTime);
             }
-
         }
         List<Boid> GetBoidsWithinVisionRange()
         {
