@@ -13,16 +13,23 @@ namespace BoidsSimulator
         #region Constants
         public static readonly Vector2 ScreenSize = new Vector2(1600, 900);
         public static readonly Vector2 ScreenMargin = new Vector2(125, 125); // How close boids can get to the screen edge before being pushed inwards
+
+        public const int NumberOfBoids = 200;
+        public const int NumberOfPredatoids = 2;
         #endregion
 
         // If true, will choose a random boid to debug
         bool _debugBoid = false;
+        bool _debugPredatoid = false;
 
         private Texture2D _boidTexture;
+        private Texture2D _predatoidTexture;
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+
         public static readonly List<Boid> AllBoids = new List<Boid>();
+        public static readonly List<Predatoid> AllPredatoids = new List<Predatoid>();
 
         private KeyboardState _currentState;
         private KeyboardState _previousState;
@@ -52,6 +59,7 @@ namespace BoidsSimulator
 
             // TODO: use this.Content to load your game content here
             _boidTexture = Content.Load<Texture2D>("Sprites/boid");
+            _predatoidTexture = Content.Load<Texture2D>("Sprites/predatoid");
 
             RestartSimulation();
 
@@ -73,6 +81,10 @@ namespace BoidsSimulator
             {
                 boid.Update(gameTime);
             }
+            foreach(Predatoid predatoid in AllPredatoids)
+            {
+                predatoid.Update(gameTime);
+            }
             if(_currentState.IsKeyDown(Keys.R) && _previousState.IsKeyUp(Keys.R))
             {
                 // Restart simulation
@@ -91,6 +103,10 @@ namespace BoidsSimulator
             {
                 boid.Draw(_spriteBatch);
             }
+            foreach(Predatoid predatoid in AllPredatoids)
+            {
+                predatoid.Draw(_spriteBatch);
+            }
             _spriteBatch.End();
             base.Draw(gameTime);
         }
@@ -98,7 +114,8 @@ namespace BoidsSimulator
         {
             AllBoids.Clear();
             Boid.IDCount = 0;
-            SpawnBoids(200);
+            SpawnBoids(NumberOfBoids);
+            SpawnPredatoids(NumberOfPredatoids);
 
             if (_debugBoid)
             {
@@ -107,6 +124,13 @@ namespace BoidsSimulator
                 debuggedBoid.SeparationDebug = true;
                 debuggedBoid.AlignmentDebug = true;
                 debuggedBoid.CohesionDebug = true;
+            }
+            if (_debugPredatoid)
+            {
+                Predatoid debuggedPredatoid = GetRandomPredatoid();
+                debuggedPredatoid.VisionDebug = true;
+                debuggedPredatoid.SeparationDebug = true;
+                debuggedPredatoid.ChaseDebug = true;
             }
         }
         void SpawnBoids(int numBoids)
@@ -122,10 +146,29 @@ namespace BoidsSimulator
                 Boid.IDCount++;
             }
         }
+        void SpawnPredatoids(int numPredatoids)
+        {
+            Random random = new Random();
+            for (int i = 0; i < numPredatoids; i++)
+            {
+                Vector2 randPos = new Vector2(random.Next(0, (int)ScreenSize.X), random.Next(0, (int)ScreenSize.Y));
+                Vector2 randVel = new Vector2(random.Next((int)-Predatoid.PredatoidMaxSpeed, (int)Predatoid.PredatoidMaxSpeed),
+                                              random.Next((int)-Predatoid.PredatoidMaxSpeed, (int)Predatoid.PredatoidMaxSpeed));
+                Predatoid p = new Predatoid(_predatoidTexture, randPos, randVel);
+                p.ID = Predatoid.IDCount;
+                AllPredatoids.Add(p);
+                Predatoid.IDCount++;
+            }
+        }
         Boid GetRandomBoid()
         {
             Random random = new Random();
             return AllBoids[random.Next(0, AllBoids.Count)];
+        }
+        Predatoid GetRandomPredatoid()
+        {
+            Random random = new Random();
+            return AllPredatoids[random.Next(0, AllPredatoids.Count)];
         }
     }
 }

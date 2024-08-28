@@ -15,6 +15,7 @@ namespace BoidsSimulator
     {
         #region Constants
         public const float BoidVisionRange = 130f;
+        public const float BoidFleeMultiplier = 0.8f;
         public const float BoidSeparationRange = 30f;
         public const float BoidSeparationMultiplier = 0.15f;
         public const float BoidAlignmentMultiplier = 0.15f;
@@ -70,6 +71,7 @@ namespace BoidsSimulator
             }
             if (SeparationDebug)
             {
+                // Inefficient to call this three times, but it's only used for debugging which won't be in the final version
                 List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
                 spriteBatch.DrawLine(Position, Position + CalculateSeparationAcceleration(nearbyBoids), Color.White, 5);
                 spriteBatch.DrawCircle(Position, BoidSeparationRange, 20, Color.Red, 3);
@@ -84,7 +86,6 @@ namespace BoidsSimulator
                 List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
                 spriteBatch.DrawLine(Position, Position + CalculateCohesionAcceleration(nearbyBoids), Color.Green, 5);
             }
-
         }
         // TODO: Use an accumulator to prioritize certain actions (steering away from collision) over others (cohesion)
         Vector2 RecalculateAcceleration()
@@ -158,6 +159,10 @@ namespace BoidsSimulator
             totalPos /= validBoidCount;
             return Helper.VectorBetweenPoints(Position, totalPos);
         }
+        Vector2 CalculateFleeAcceleration(List<Predatoid> nearbryPredatoids)
+        {
+            return Vector2.Zero;
+        }
         /// <summary>
         /// Obsolete. Wraps boid around screen by teleporting it to the other side when it hits an edge. Uses padding to hide teleportation
         /// </summary>
@@ -206,7 +211,6 @@ namespace BoidsSimulator
             {
                 if(Vector2.Distance(Position, boid.Position) <= BoidVisionRange && !Equals(boid))
                 {
-                    // TODO: Prevent boids from seeing other boids behind them?
                     foundBoids.Add(boid);
                 }
             }
