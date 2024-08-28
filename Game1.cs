@@ -12,7 +12,7 @@ namespace BoidsSimulator
     {
         #region Constants
         public static readonly Vector2 ScreenSize = new Vector2(1600, 900);
-        public static readonly Vector2 ScreenMargin = new Vector2(70, 70); // How close boids can get to the screen edge before being pushed inwards
+        public static readonly Vector2 ScreenMargin = new Vector2(125, 125); // How close boids can get to the screen edge before being pushed inwards
         #endregion
 
         private Texture2D _boidTexture;
@@ -52,6 +52,7 @@ namespace BoidsSimulator
             debuggedBoid.SeparationDebug = true;
             debuggedBoid.AlignmentDebug = true;
             debuggedBoid.CohesionDebug = true;
+            Boid.IDCount = 0;
         }
 
         protected override void Update(GameTime gameTime)
@@ -88,7 +89,10 @@ namespace BoidsSimulator
             {
                 Vector2 randPos = new Vector2(random.Next(0, (int)ScreenSize.X), random.Next(0, (int)ScreenSize.Y));
                 Vector2 randVel = new Vector2(random.Next((int)-Boid.BoidMaxSpeed, (int)Boid.BoidMaxSpeed), random.Next((int)-Boid.BoidMaxSpeed, (int)Boid.BoidMaxSpeed));
-                AllBoids.Add(new Boid(_boidTexture, randPos, randVel));
+                Boid b = new Boid(_boidTexture, randPos, randVel);
+                b.ID = Boid.IDCount;
+                AllBoids.Add(b);
+                Boid.IDCount++;
             }
         }
         Boid GetRandomBoid()

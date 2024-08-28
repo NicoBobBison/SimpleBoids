@@ -14,20 +14,22 @@ namespace BoidsSimulator
     public class Boid : IEquatable<Boid>
     {
         #region Constants
-        public const float BoidVisionRange = 100f;
+        public const float BoidVisionRange = 130f;
         public const float BoidSeparationRange = 30f;
-        public const float BoidSeparationMultiplier = 0.3f;
-        public const float BoidAlignmentMultiplier = 0.1f;
-        public const float BoidCohesionMultiplier = 0.06f;
+        public const float BoidSeparationMultiplier = 0.15f;
+        public const float BoidAlignmentMultiplier = 0.15f;
+        public const float BoidCohesionMultiplier = 0.0015f;
 
-        public const float BoidMinSpeed = 100f;
+        public const float BoidMinSpeed = 450f;
         public const float BoidMaxSpeed = 600f;
-        public const float BoidMaxAcceleration = 20f;
-        public const float BoidEdgeTurnSpeed = 1000f;
+        public const float BoidMaxAcceleration = 40f;
+        public const float BoidEdgeTurnSpeed = 2500f;
         #endregion
 
         public Vector2 Position;
         public Vector2 Velocity = Vector2.Zero;
+        public int ID = 0;
+        public static int IDCount = 0;
 
         #region Debug
         public bool VisionDebug;
@@ -46,12 +48,13 @@ namespace BoidsSimulator
         }
         public void Update(GameTime gameTime)
         {
-            Position += Velocity * Helper.GetDeltaTime(gameTime);
-            Velocity += _acceleration * Helper.GetDeltaTime(gameTime);
             _acceleration = RecalculateAcceleration() * BoidMaxAcceleration;
             Velocity = Helper.ClampVectorMagnitude(Velocity, BoidMinSpeed, BoidMaxSpeed);
-            //WrapAroundScreen();
             KeepWithinBounds(gameTime);
+
+            //WrapAroundScreen();
+            Velocity += _acceleration * Helper.GetDeltaTime(gameTime);
+            Position += Velocity * Helper.GetDeltaTime(gameTime);
         }
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -112,9 +115,7 @@ namespace BoidsSimulator
                     continue;
                 }
                 Vector2 distance = Helper.VectorBetweenPoints(Position, boid.Position);
-                float magOfDistance = Helper.GetMagnitude(distance);
-                float weight = 1 - (magOfDistance / BoidVisionRange);
-                totalDistance += distance * weight;
+                totalDistance += distance;
             }
             // totalDistance /= nearbyBoids.Count;
             return Helper.InvertVector(totalDistance);
@@ -203,13 +204,16 @@ namespace BoidsSimulator
             foreach(Boid boid in Game1.AllBoids)
             {
                 if(Vector2.Distance(Position, boid.Position) <= BoidVisionRange && !Equals(boid))
+                {
+                    // TODO: Prevent boids from seeing other boids behind them?
                     foundBoids.Add(boid);
+                }
             }
             return foundBoids;
         }
         public bool Equals(Boid other)
         {
-            return Position == other.Position && Velocity == other.Velocity;
+            return ID == other.ID;
         }
     }
 }
