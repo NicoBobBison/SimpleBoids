@@ -18,7 +18,7 @@ namespace BoidsSimulator
         public const float PredatoidSeparationRange = 60f;
         public const float PredatoidSeparationMultiplier = 0.15f;
 
-        public const float PredatoidMinSpeed = 150f;
+        public const float PredatoidMinSpeed = 250f;
         public const float PredatoidMaxSpeed = 500f;
         public const float PredatoidMaxAcceleration = 60f;
         public const float PredatoidEdgeTurnSpeed = 40f;

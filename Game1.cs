@@ -114,7 +114,9 @@ namespace BoidsSimulator
         void RestartSimulation()
         {
             AllBoids.Clear();
+            AllPredatoids.Clear();
             Boid.IDCount = 0;
+            Predatoid.IDCount = 0;
             SpawnBoids(NumberOfBoids);
             SpawnPredatoids(NumberOfPredatoids);
 
