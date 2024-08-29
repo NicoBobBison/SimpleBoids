@@ -92,7 +92,7 @@ namespace BoidsSimulator
         {
             List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
             List<Predatoid> nearbyPred = GetPredatoidsWithinVisionRange();
-            if(nearbyBoids.Count <= 1)
+            if(nearbyBoids.Count == 0 && nearbyPred.Count == 0)
             {
                 return Vector2.Zero;
             }
@@ -109,7 +109,6 @@ namespace BoidsSimulator
 
             return accumulator.Value;
         }
-        // TODO: Figure out why this isn't giving a very strong velocity
         Vector2 CalculateSeparationAcceleration(List<Boid> nearbyBoids)
         {
             // Take the inverse of the vectors from this boid to all nearby boids and average them

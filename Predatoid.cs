@@ -13,9 +13,9 @@ namespace BoidsSimulator
     public class Predatoid
     {
         #region Constants
-        public const float PredatoidVisionRange = 130f;
-        public const float PredatoidChaseMultiplier = 0.5f;
-        public const float PredatoidSeparationRange = 30f;
+        public const float PredatoidVisionRange = 180f;
+        public const float PredatoidChaseMultiplier = 0.2f;
+        public const float PredatoidSeparationRange = 60f;
         public const float PredatoidSeparationMultiplier = 0.15f;
 
         public const float PredatoidMinSpeed = 150f;
@@ -66,14 +66,59 @@ namespace BoidsSimulator
             if (SeparationDebug)
             {
                 List<Predatoid> nearbyPredatoids = GetPredatoidsWithinVisionRange();
-                //spriteBatch.DrawLine(Position, Position + CalculateSeparationAcceleration(nearbyBoids), Color.White, 5);
+                spriteBatch.DrawLine(Position, Position + CalculateSeparationAcceleration(nearbyPredatoids), Color.White, 5);
                 spriteBatch.DrawCircle(Position, PredatoidSeparationRange, 20, Color.Red, 3);
             }
         }
         Vector2 RecalculateAcceleration()
         {
-            return Vector2.Zero;
+            List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
+            List<Predatoid> nearbyPred = GetPredatoidsWithinVisionRange();
+            if (nearbyBoids.Count == 0 && nearbyPred.Count == 0)
+            {
+                return Vector2.Zero;
+            }
+
+            Vector2 chaseAcceleration = CalculateChaseAcceleration(nearbyBoids) * PredatoidChaseMultiplier;
+            Vector2 separationAcceleration = CalculateSeparationAcceleration(nearbyPred) * PredatoidSeparationMultiplier;
+
+            AcceleratorAccumulator accumulator = new AcceleratorAccumulator(PredatoidMaxAcceleration);
+            accumulator.AddAccelerationRequest(chaseAcceleration);
+            accumulator.AddAccelerationRequest(separationAcceleration);
+
+            return accumulator.Value;
         }
+        Vector2 CalculateChaseAcceleration(List<Boid> nearbyBoids)
+        {
+            Vector2 totalPos = Vector2.Zero;
+            int validBoidCount = 0;
+            foreach (Boid boid in nearbyBoids)
+            {
+                totalPos += boid.Position;
+                validBoidCount++;
+            }
+            if (validBoidCount == 0)
+                return Vector2.Zero;
+            totalPos /= validBoidCount;
+            return Helper.VectorBetweenPoints(Position, totalPos);
+        }
+        Vector2 CalculateSeparationAcceleration(List<Predatoid> nearbyPred)
+        {
+            // Take the inverse of the vectors from this boid to all nearby boids and average them
+            Vector2 totalDistance = Vector2.Zero;
+            foreach (Predatoid p in nearbyPred)
+            {
+                // Skip boids we aren't going to collide with
+                if (Vector2.Distance(Position, p.Position) > PredatoidSeparationRange)
+                {
+                    continue;
+                }
+                Vector2 distance = Helper.VectorBetweenPoints(Position, p.Position);
+                totalDistance += distance;
+            }
+            return Helper.InvertVector(totalDistance);
+        }
+
         void KeepWithinBounds(GameTime gameTime)
         {
             if (Position.X < Game1.ScreenMargin.X)
