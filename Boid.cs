@@ -15,7 +15,7 @@ namespace BoidsSimulator
     {
         #region Constants
         public const float BoidVisionRange = 130f;
-        public const float BoidFleeMultiplier = 0.8f;
+        public const float BoidFleeMultiplier = 1f;
         public const float BoidSeparationRange = 30f;
         public const float BoidSeparationMultiplier = 0.15f;
         public const float BoidAlignmentMultiplier = 0.15f;
@@ -23,7 +23,7 @@ namespace BoidsSimulator
 
         public const float BoidMinSpeed = 450f;
         public const float BoidMaxSpeed = 600f;
-        public const float BoidMaxAcceleration = 40f;
+        public const float BoidMaxAcceleration = 60f;
         public const float BoidEdgeTurnSpeed = 80f;
         public const float BoidGravityAcceleration = 10f;
         #endregion
@@ -91,15 +91,18 @@ namespace BoidsSimulator
         Vector2 RecalculateAcceleration()
         {
             List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
+            List<Predatoid> nearbyPred = GetPredatoidsWithinVisionRange();
             if(nearbyBoids.Count <= 1)
             {
                 return Vector2.Zero;
             }
+            Vector2 fleeAcceleration = CalculateFleeAcceleration(nearbyPred) * BoidFleeMultiplier;
             Vector2 separationAcceleration = CalculateSeparationAcceleration(nearbyBoids) * BoidSeparationMultiplier;
             Vector2 alignmentAcceleration = CalculateAlignmentAcceleration(nearbyBoids) * BoidAlignmentMultiplier;
             Vector2 cohesionAcceleration = CalculateCohesionAcceleration(nearbyBoids) * BoidCohesionMultiplier;
 
             AcceleratorAccumulator accumulator = new AcceleratorAccumulator(BoidMaxAcceleration);
+            accumulator.AddAccelerationRequest(fleeAcceleration);
             accumulator.AddAccelerationRequest(separationAcceleration);
             accumulator.AddAccelerationRequest(alignmentAcceleration);
             accumulator.AddAccelerationRequest(cohesionAcceleration);
@@ -161,7 +164,19 @@ namespace BoidsSimulator
         }
         Vector2 CalculateFleeAcceleration(List<Predatoid> nearbryPredatoids)
         {
-            return Vector2.Zero;
+            Vector2 totalDistance = Vector2.Zero;
+            foreach (Predatoid pred in nearbryPredatoids)
+            {
+                // Skip boids we aren't going to collide with
+                if (Vector2.Distance(Position, pred.Position) > BoidVisionRange)
+                {
+                    continue;
+                }
+                Vector2 distance = Helper.VectorBetweenPoints(Position, pred.Position);
+                totalDistance += distance;
+            }
+            return Helper.InvertVector(totalDistance);
+
         }
         /// <summary>
         /// Obsolete. Wraps boid around screen by teleporting it to the other side when it hits an edge. Uses padding to hide teleportation
@@ -216,6 +231,19 @@ namespace BoidsSimulator
             }
             return foundBoids;
         }
+        List<Predatoid> GetPredatoidsWithinVisionRange()
+        {
+            List<Predatoid> foundPred = new List<Predatoid>();
+            foreach (Predatoid p in Game1.AllPredatoids)
+            {
+                if (Vector2.Distance(Position, p.Position) <= BoidVisionRange)
+                {
+                    foundPred.Add(p);
+                }
+            }
+            return foundPred;
+        }
+
         public bool Equals(Boid other)
         {
             return ID == other.ID;
