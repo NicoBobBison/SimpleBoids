@@ -13,16 +13,18 @@ namespace BoidsSimulator
     public class Predatoid
     {
         #region Constants
-        public const float PredatoidVisionRange = 180f;
+        public const float PredatoidVisionRange = 100f;
         public const float PredatoidChaseMultiplier = 0.2f;
         public const float PredatoidSeparationRange = 60f;
         public const float PredatoidSeparationMultiplier = 0.15f;
 
         public const float PredatoidMinSpeed = 150f;
-        public const float PredatoidMaxSpeed = 300f;
+        public const float PredatoidMaxSpeed = 500f;
         public const float PredatoidMaxAcceleration = 60f;
-        public const float PredatoidEdgeTurnSpeed = 80f;
+        public const float PredatoidEdgeTurnSpeed = 40f;
         public const float PredatoidGravityAcceleration = 10f;
+
+        readonly Color _color = new Color(227, 138, 146);
         #endregion
 
         public Vector2 Position;
@@ -56,8 +58,7 @@ namespace BoidsSimulator
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            Color color = VisionDebug ? Color.Red : Color.White;
-            spriteBatch.Draw(_texture, Position, null, color, Helper.GetRotationAroundZero(Velocity) + Helper.DegToRad(90f),
+            spriteBatch.Draw(_texture, Position, null, _color, Helper.GetRotationAroundZero(Velocity) + Helper.DegToRad(90f),
                 new Vector2(_texture.Width / 2, _texture.Height / 2), 1.0f, SpriteEffects.None, 0);
             if (VisionDebug)
             {

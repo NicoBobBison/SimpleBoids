@@ -26,6 +26,8 @@ namespace BoidsSimulator
         public const float BoidMaxAcceleration = 60f;
         public const float BoidEdgeTurnSpeed = 80f;
         public const float BoidGravityAcceleration = 10f;
+
+        readonly Color _color = new Color(124, 129, 196);
         #endregion
 
         public Vector2 Position;
@@ -62,8 +64,7 @@ namespace BoidsSimulator
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            Color color = VisionDebug ? Color.Red : Color.White;
-            spriteBatch.Draw(_texture, Position, null, color, Helper.GetRotationAroundZero(Velocity) + Helper.DegToRad(90f),
+            spriteBatch.Draw(_texture, Position, null, _color, Helper.GetRotationAroundZero(Velocity) + Helper.DegToRad(90f),
                 new Vector2(_texture.Width / 2, _texture.Height / 2), 1.0f, SpriteEffects.None, 0);
             if(VisionDebug)
             {

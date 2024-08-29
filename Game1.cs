@@ -13,6 +13,7 @@ namespace BoidsSimulator
         #region Constants
         public static readonly Vector2 ScreenSize = new Vector2(1600, 900);
         public static readonly Vector2 ScreenMargin = new Vector2(125, 125); // How close boids can get to the screen edge before being pushed inwards
+        public static readonly Color BackgroundColor = new Color(50, 53, 89);
 
         public const int NumberOfBoids = 200;
         public const int NumberOfPredatoids = 2;
@@ -95,7 +96,7 @@ namespace BoidsSimulator
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(BackgroundColor);
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
