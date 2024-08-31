@@ -9,12 +9,12 @@ namespace BoidsSimulator
     public class Game1 : Game
     {
         #region Constants
-        public static readonly Vector2 ScreenSize = new Vector2(1920, 1080);
+        public static readonly Vector2 ScreenSize = new Vector2(1920, 1080); // Size of the window
         public static readonly Vector2 ScreenMargin = new Vector2(125, 125); // How close boids can get to the screen edge before being pushed inwards
         public static readonly Color BackgroundColor = new Color(50, 53, 89);
 
-        public const int NumberOfBoids = 1000;
-        public const int NumberOfPredatoids = 2;
+        public const int NumberOfBoids = 700;
+        public const int NumberOfPredatoids = 1;
         #endregion
 
         // If true, will choose a random boid to debug
@@ -30,8 +30,6 @@ namespace BoidsSimulator
 
         public static readonly SpatialPartioner Space = new SpatialPartioner((int)Boid.BoidVisionRange, 1000);
         private List<SceneObject> _sceneObjects = new List<SceneObject>();
-        public static readonly List<Boid> AllBoids = new List<Boid>();
-        public static readonly List<Predatoid> AllPredatoids = new List<Predatoid>();
 
         private KeyboardState _currentState;
         private KeyboardState _previousState;
@@ -108,8 +106,6 @@ namespace BoidsSimulator
         }
         void RestartSimulation()
         {
-            AllBoids.Clear();
-            AllPredatoids.Clear();
             _idCount = 0;
             SpawnBoids(NumberOfBoids);
             SpawnPredatoids(NumberOfPredatoids);
@@ -139,7 +135,6 @@ namespace BoidsSimulator
                 Vector2 randVel = new Vector2(random.Next((int)-Boid.BoidMaxSpeed, (int)Boid.BoidMaxSpeed), random.Next((int)-Boid.BoidMaxSpeed, (int)Boid.BoidMaxSpeed));
                 Boid b = new Boid(_boidTexture, randPos, randVel);
                 b.ID = _idCount;
-                AllBoids.Add(b);
                 _sceneObjects.Add(b);
                 _idCount++;
             }
@@ -154,20 +149,34 @@ namespace BoidsSimulator
                                               random.Next((int)-Predatoid.PredatoidMaxSpeed, (int)Predatoid.PredatoidMaxSpeed));
                 Predatoid p = new Predatoid(_predatoidTexture, randPos, randVel);
                 p.ID = _idCount;
-                AllPredatoids.Add(p);
                 _sceneObjects.Add(p);
                 _idCount++;
             }
         }
+        // Technically gets the first boid in the list, but they start in random positions so it's basically random
         Boid GetRandomBoid()
         {
-            Random random = new Random();
-            return AllBoids[random.Next(0, AllBoids.Count)];
+            foreach(SceneObject obj in Space.DenseObjects)
+            {
+                if (obj is Boid)
+                {
+                    return (Boid)obj;
+                }
+            }
+            // Should never reach this point
+            return null;
         }
         Predatoid GetRandomPredatoid()
         {
-            Random random = new Random();
-            return AllPredatoids[random.Next(0, AllPredatoids.Count)];
+            foreach (SceneObject obj in Space.DenseObjects)
+            {
+                if (obj is Predatoid)
+                {
+                    return (Predatoid)obj;
+                }
+            }
+            // Should never reach this point
+            return null;
         }
     }
 }

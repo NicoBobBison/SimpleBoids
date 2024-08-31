@@ -13,7 +13,7 @@ namespace BoidsSimulator
     public class Predatoid : SceneObject, IEquatable<Predatoid>
     {
         #region Constants
-        public const float PredatoidVisionRange = 200f;
+        public const float PredatoidVisionRange = 250f;
         public const float PredatoidChaseMultiplier = 0.2f;
         public const float PredatoidSeparationRange = 100f;
         public const float PredatoidSeparationMultiplier = 0.2f;

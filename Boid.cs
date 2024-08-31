@@ -15,16 +15,16 @@ namespace BoidsSimulator
     public class Boid : SceneObject, IEquatable<Boid>
     {
         #region Constants
-        public const float BoidVisionRange = 130f;
+        public const float BoidVisionRange = 110f;
         public const float BoidFleeMultiplier = 1f;
-        public const float BoidSeparationRange = 30f;
+        public const float BoidSeparationRange = 25f;
         public const float BoidSeparationMultiplier = 0.15f;
-        public const float BoidAlignmentMultiplier = 0.15f;
+        public const float BoidAlignmentMultiplier = 0.1f;
         public const float BoidCohesionMultiplier = 0.0015f;
 
         public const float BoidMinSpeed = 450f;
         public const float BoidMaxSpeed = 600f;
-        public const float BoidMaxAcceleration = 60f;
+        public const float BoidMaxAcceleration = 80f;
         public const float BoidEdgeTurnSpeed = 100f;
         public const float BoidGravityAcceleration = 10f;
 
