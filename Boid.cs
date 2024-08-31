@@ -219,11 +219,11 @@ namespace BoidsSimulator
         }
         List<Boid> GetBoidsWithinVisionRange()
         {
-            if (VisionDebug)
+/*            if (VisionDebug)
             {
                 Debug.WriteLine(Game1.Space.QueryNearbyObjects(Position, BoidVisionRange).Count);
             }
-            List<Boid> foundBoids = new List<Boid>();
+*/            List<Boid> foundBoids = new List<Boid>();
             foreach(SceneObject obj in Game1.Space.QueryNearbyObjects(Position, BoidVisionRange))
             {
                 if (obj is Boid)

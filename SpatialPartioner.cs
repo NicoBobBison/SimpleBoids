@@ -10,7 +10,7 @@ namespace BoidsSimulator
 {
     public class SpatialPartioner
     {
-        int[] _positionHash;
+        int[] _densityIndexHash;
         public SceneObject[] DenseObjects;
 
         int _spacing;
@@ -31,12 +31,12 @@ namespace BoidsSimulator
         {
             DenseObjects = new SceneObject[objects.Count];
             // Add extra 1 storage as a guard in case last index is populated
-            _positionHash = new int[_hashTableSize + 1];
+            _densityIndexHash = new int[_hashTableSize + 1];
             Insert(objects);
         }
         void Insert(List<SceneObject> objects)
         {
-            _positionHash = new int[_hashTableSize + 1];
+            _densityIndexHash = new int[_hashTableSize + 1];
             foreach(SceneObject obj in objects)
             {
                 // Hash each object and increment hash table
@@ -44,17 +44,17 @@ namespace BoidsSimulator
                 int yi = (int)obj.Position.Y / _spacing;
                 int i = Hash(new Vector2(xi, yi));
 
-                _positionHash[i]++;
+                _densityIndexHash[i]++;
             }
-/*            foreach (int i in _positionHash)
+/*          foreach (int i in _positionHash)
             {
                 Debug.Write(i + " ");
-            }
-*/            int partialSumCount = 0;
+            }*/
+            int partialSumCount = 0;
             for(int i = 0; i < _hashTableSize + 1; i++)
             {
-                partialSumCount += _positionHash[i];
-                _positionHash[i] = partialSumCount;
+                partialSumCount += _densityIndexHash[i];
+                _densityIndexHash[i] = partialSumCount;
             }
             foreach(SceneObject obj in objects)
             {
@@ -62,11 +62,10 @@ namespace BoidsSimulator
                 int yi = (int)obj.Position.Y / _spacing;
                 int i = Hash(new Vector2(xi, yi));
 
-                int denseIndex = _positionHash[i];
+                int denseIndex = _densityIndexHash[i];
                 DenseObjects[denseIndex - 1] = obj;
-                _positionHash[i]--;
+                _densityIndexHash[i]--;
             }
-            
         }
         public List<SceneObject> QueryNearbyObjects(Vector2 pos, float range)
         {
@@ -76,9 +75,9 @@ namespace BoidsSimulator
             Vector2 initSquarePos = new Vector2(pos.X - range, pos.Y - range);
             Vector2 squarePos = initSquarePos;
 
-            while(squarePos.Y < pos.Y + 2 * range)
+            while(squarePos.Y < pos.Y + range)
             {
-                while(squarePos.X < pos.X + 2 * range)
+                while(squarePos.X < pos.X + range)
                 {
                     // Hash the points in those squares to get the indeces to check for
 
@@ -86,11 +85,12 @@ namespace BoidsSimulator
                     int yi = (int)squarePos.Y / _spacing;
                     int i = Hash(new Vector2(xi, yi));
 
-                    int numObjects = _positionHash[i+1] - _positionHash[i];
+                    int numObjects = _densityIndexHash[i+1] - _densityIndexHash[i];
                     if (numObjects > 0)
                     {
+                        //Debug.WriteLine(numObjects);
                         // TODO: Figure out why this always finds waaaaaaaay more objects than it should
-                        for(int denseIndex = _positionHash[i]; denseIndex < numObjects; denseIndex++)
+                        for(int denseIndex = _densityIndexHash[i]; denseIndex < _densityIndexHash[i] + numObjects; denseIndex++)
                         {
                             foundObjects.Add(DenseObjects[denseIndex]);
                         }
@@ -106,8 +106,8 @@ namespace BoidsSimulator
         int Hash(Vector2 pos)
         {
             // Integers are arbitrary large prime numbers. Goal is to get a pseudo random hash based on position
-            int hash = (int)Math.Pow((int)pos.X * 92837111, (int)pos.Y * 689287499);
-            return Math.Abs(hash % _hashTableSize);
+            int hash = (((int)pos.X * 92837111) ^ ((int)pos.Y * 689287499)) % _hashTableSize;
+            return Math.Abs(hash);
         }
     }
 }
