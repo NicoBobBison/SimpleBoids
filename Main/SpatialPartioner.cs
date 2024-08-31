@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Xna.Framework;
 
-namespace BoidsSimulator
+namespace BoidsSimulator.Main
 {
     public class SpatialPartioner
     {
@@ -43,7 +43,7 @@ namespace BoidsSimulator
         void Insert(List<SceneObject> objects)
         {
             _densityIndexHash = new int[_hashTableSize + 1];
-            foreach(SceneObject obj in objects)
+            foreach (SceneObject obj in objects)
             {
                 // Hash each object and increment hash table
                 int xi = (int)obj.Position.X / _spacing;
@@ -52,17 +52,17 @@ namespace BoidsSimulator
 
                 _densityIndexHash[i]++;
             }
-/*          foreach (int i in _positionHash)
-            {
-                Debug.Write(i + " ");
-            }*/
+            /*          foreach (int i in _positionHash)
+                        {
+                            Debug.Write(i + " ");
+                        }*/
             int partialSumCount = 0;
-            for(int i = 0; i < _hashTableSize + 1; i++)
+            for (int i = 0; i < _hashTableSize + 1; i++)
             {
                 partialSumCount += _densityIndexHash[i];
                 _densityIndexHash[i] = partialSumCount;
             }
-            foreach(SceneObject obj in objects)
+            foreach (SceneObject obj in objects)
             {
                 int xi = (int)obj.Position.X / _spacing;
                 int yi = (int)obj.Position.Y / _spacing;
@@ -81,9 +81,9 @@ namespace BoidsSimulator
             Vector2 initSquarePos = new Vector2(pos.X - range, pos.Y - range);
             Vector2 squarePos = initSquarePos;
 
-            while(squarePos.Y < pos.Y + range)
+            while (squarePos.Y < pos.Y + range)
             {
-                while(squarePos.X < pos.X + range)
+                while (squarePos.X < pos.X + range)
                 {
                     // Hash the points in those squares to get the indeces to check for
 
@@ -91,10 +91,10 @@ namespace BoidsSimulator
                     int yi = (int)squarePos.Y / _spacing;
                     int i = Hash(new Vector2(xi, yi));
 
-                    int numObjects = _densityIndexHash[i+1] - _densityIndexHash[i];
+                    int numObjects = _densityIndexHash[i + 1] - _densityIndexHash[i];
                     if (numObjects > 0)
                     {
-                        for(int denseIndex = _densityIndexHash[i]; denseIndex < _densityIndexHash[i] + numObjects; denseIndex++)
+                        for (int denseIndex = _densityIndexHash[i]; denseIndex < _densityIndexHash[i] + numObjects; denseIndex++)
                         {
                             foundObjects.Add(DenseObjects[denseIndex]);
                         }
@@ -110,7 +110,7 @@ namespace BoidsSimulator
         int Hash(Vector2 pos)
         {
             // Integers are arbitrary large prime numbers. Goal is to get a pseudo random hash based on position
-            int hash = (((int)pos.X * 92837111) ^ ((int)pos.Y * 689287499)) % _hashTableSize;
+            int hash = ((int)pos.X * 92837111 ^ (int)pos.Y * 689287499) % _hashTableSize;
             return Math.Abs(hash);
         }
     }

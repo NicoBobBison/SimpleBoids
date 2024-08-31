@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoidsSimulator
+namespace BoidsSimulator.Main
 {
     public class Boid : SceneObject, IEquatable<Boid>
     {
@@ -64,7 +64,7 @@ namespace BoidsSimulator
         {
             spriteBatch.Draw(_texture, Position, null, _color, Helper.GetRotationAroundZero(Velocity) + Helper.DegToRad(90f),
                 new Vector2(_texture.Width / 2, _texture.Height / 2), 1.0f, SpriteEffects.None, 0);
-            if(VisionDebug)
+            if (VisionDebug)
             {
                 spriteBatch.DrawCircle(Position, BoidVisionRange, 20, Color.Green, 3);
             }
@@ -91,7 +91,7 @@ namespace BoidsSimulator
         {
             List<Boid> nearbyBoids = GetBoidsWithinVisionRange();
             List<Predatoid> nearbyPred = GetPredatoidsWithinVisionRange();
-            if(nearbyBoids.Count == 0 && nearbyPred.Count == 0)
+            if (nearbyBoids.Count == 0 && nearbyPred.Count == 0)
             {
                 return Vector2.Zero;
             }
@@ -115,7 +115,7 @@ namespace BoidsSimulator
             foreach (Boid boid in nearbyBoids)
             {
                 // Skip boids we aren't going to collide with
-                if(Vector2.Distance(Position, boid.Position) > BoidSeparationRange)
+                if (Vector2.Distance(Position, boid.Position) > BoidSeparationRange)
                 {
                     continue;
                 }
@@ -128,9 +128,9 @@ namespace BoidsSimulator
         {
             Vector2 totalVel = Vector2.Zero;
             int validBoidCount = 0;
-            foreach(Boid boid in nearbyBoids)
+            foreach (Boid boid in nearbyBoids)
             {
-                if(Vector2.Distance(Position, boid.Position) <= BoidSeparationRange)
+                if (Vector2.Distance(Position, boid.Position) <= BoidSeparationRange)
                 {
                     continue;
                 }
@@ -220,7 +220,7 @@ namespace BoidsSimulator
         List<Boid> GetBoidsWithinVisionRange()
         {
             List<Boid> foundBoids = new List<Boid>();
-            foreach(SceneObject obj in Game1.Space.QueryNearbyObjects(Position, BoidVisionRange))
+            foreach (SceneObject obj in Game1.Space.QueryNearbyObjects(Position, BoidVisionRange))
             {
                 if (obj is Boid)
                 {

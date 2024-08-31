@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BoidsSimulator.Main;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -15,7 +16,7 @@ namespace BoidsSimulator
         public static readonly Color BackgroundColor = new Color(50, 53, 89);
 
         // Number of boids/predatoids to spawn
-        public const int NumberOfBoids = 700;
+        public const int NumberOfBoids = 600;
         public const int NumberOfPredatoids = 1;
         #endregion
 

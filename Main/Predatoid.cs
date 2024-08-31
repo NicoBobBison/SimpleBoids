@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame;
 
-namespace BoidsSimulator
+namespace BoidsSimulator.Main
 {
     public class Predatoid : SceneObject, IEquatable<Predatoid>
     {
@@ -173,7 +173,7 @@ namespace BoidsSimulator
             List<Boid> foundBoids = new List<Boid>();
             foreach (SceneObject obj in Game1.Space.QueryNearbyObjects(Position, PredatoidVisionRange))
             {
-                if(obj is Boid)
+                if (obj is Boid)
                 {
                     if (Vector2.Distance(Position, obj.Position) <= PredatoidVisionRange)
                     {

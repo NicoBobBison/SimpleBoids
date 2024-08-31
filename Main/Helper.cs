@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoidsSimulator
+namespace BoidsSimulator.Main
 {
     internal static class Helper
     {
@@ -17,7 +17,7 @@ namespace BoidsSimulator
         {
             float angle = (float)Math.Atan2(vector.Y, vector.X);
             // We want the rotation to always be a positive number
-            if(angle >= 0)
+            if (angle >= 0)
             {
                 return angle;
             }
@@ -47,12 +47,12 @@ namespace BoidsSimulator
         }
         public static Vector2 ClampVectorMagnitude(Vector2 vector, float minMagnitude, float maxMagnitude)
         {
-            if(Vector2.Distance(Vector2.Zero, vector) > maxMagnitude)
+            if (Vector2.Distance(Vector2.Zero, vector) > maxMagnitude)
             {
                 vector.Normalize();
                 return vector * maxMagnitude;
             }
-            if(Vector2.Distance(Vector2.Zero, vector) < minMagnitude)
+            if (Vector2.Distance(Vector2.Zero, vector) < minMagnitude)
             {
                 vector.Normalize();
                 return vector * minMagnitude;

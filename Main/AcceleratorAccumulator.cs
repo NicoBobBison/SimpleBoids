@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoidsSimulator
+namespace BoidsSimulator.Main
 {
     /// <summary>
     /// Adds acceleration requests and magnitudes together until reaching the maximum magnitude value, then caps the acceleration at that magnitude.
@@ -29,7 +29,7 @@ namespace BoidsSimulator
             float magnitude = Vector2.Distance(Vector2.Zero, request);
             _currentMagnitude += magnitude;
             Value += request;
-            if(_currentMagnitude > _maxMagnitude)
+            if (_currentMagnitude > _maxMagnitude)
             {
                 float excess = _currentMagnitude - _maxMagnitude;
                 float percentOverflow = excess / magnitude;

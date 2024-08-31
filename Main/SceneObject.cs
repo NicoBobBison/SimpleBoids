@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace BoidsSimulator
+namespace BoidsSimulator.Main
 {
     /// <summary>
     /// Parent class for Boid and Predatoid
