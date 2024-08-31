@@ -1,11 +1,30 @@
+Simple Boids by NicoBobBison
+
+DESCRIPTION:
+	Simple Boids is a minimalistic program that simulates the flocking behavior of birds using the algorithm described in Craig Reynolds' 1987 paper "Flocks, Herds, and Schools: A Distributed Behavioral Model". By adjusting parameters like alignment, cohesion, and separation, users can observe and alter how these bird-like objects collectively exhibit realistic flocking dynamics.
+
+	When the scene starts, a specified number of boids (configurable in Game1.cs) spawn at random locations throughout the screen with random velocities. Over time, the boids begin to follow each other and form flocks (cohesion) while trying to maintain a bubble of space around them as to not crowd each other (separation). Also, each boid attempts to steer in the direction of other nearby boids within their vision range (alignment).
+
+	Each scene also spawns predators (1 by default, configurable in Game1.cs) that chase nearby boids in their vision range. Boids attempt to flee from nearby "predatoids".
+
+	To manage the high number of vision checks, Simple Boids uses a custom spatial partitioner that divides the scene into squares with side length equal to the vision range of a boid. This drastically reduces the number of checks necessary to get nearby boids, allowing for more boids to be simulated at once. While partitioning could be used to store predatoids as well, the program will usually brute force vision checks to find nearby predatoids (unless there are a large amount of them in the scene, configurable in Game1.cs) since, by default, the scene has only 1.
 
 
+TO RUN:
+	
 
-Libraries:
+
+CONTROLS:
+	R - Restart simulation
+	ESC - Close program
+
+
+LIBRARIES:
 Rendering windows and sprites: Monogame 3.8.1 (https://github.com/MonoGame/MonoGame)
 Drawing primitives for debugging: https://github.com/DoogeJ/MonoGame.Primitives2D
 
-References:
+
+SOURCES:
 Boids (& Predatoids):
 	Flocks, Herds, and Schools: A Distributed Behavioral Model by Craig W. Reynolds (https://dl.acm.org/doi/pdf/10.1145/37402.37406)
 	https://en.wikipedia.org/wiki/Boids
