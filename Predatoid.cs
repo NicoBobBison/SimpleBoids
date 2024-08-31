@@ -10,7 +10,7 @@ using MonoGame;
 
 namespace BoidsSimulator
 {
-    public class Predatoid
+    public class Predatoid : SceneObject, IEquatable<Predatoid>
     {
         #region Constants
         public const float PredatoidVisionRange = 200f;
@@ -21,16 +21,13 @@ namespace BoidsSimulator
         public const float PredatoidMinSpeed = 250f;
         public const float PredatoidMaxSpeed = 500f;
         public const float PredatoidMaxAcceleration = 60f;
-        public const float PredatoidEdgeTurnSpeed = 40f;
+        public const float PredatoidEdgeTurnSpeed = 100f;
         public const float PredatoidGravityAcceleration = 10f;
 
         readonly Color _color = new Color(227, 138, 146);
         #endregion
 
-        public Vector2 Position;
         public Vector2 Velocity = Vector2.Zero;
-        public int ID = 0;
-        public static int IDCount = 0;
 
         #region Debug
         public bool VisionDebug;
@@ -142,11 +139,14 @@ namespace BoidsSimulator
         List<Predatoid> GetPredatoidsWithinVisionRange()
         {
             List<Predatoid> foundPredatoids = new List<Predatoid>();
-            foreach(Predatoid p in Game1.AllPredatoids)
+            foreach (SceneObject obj in Game1.Space.DenseObjects)
             {
-                if (Vector2.Distance(Position, p.Position) <= PredatoidVisionRange)
+                if(obj is Predatoid)
                 {
-                    foundPredatoids.Add(p);
+                    if (Vector2.Distance(Position, obj.Position) <= PredatoidVisionRange)
+                    {
+                        foundPredatoids.Add((Predatoid)obj);
+                    }
                 }
             }
             return foundPredatoids;
@@ -154,14 +154,21 @@ namespace BoidsSimulator
         List<Boid> GetBoidsWithinVisionRange()
         {
             List<Boid> foundBoids = new List<Boid>();
-            foreach (Boid boid in Game1.AllBoids)
+            foreach (SceneObject obj in Game1.Space.DenseObjects)
             {
-                if (Vector2.Distance(Position, boid.Position) <= PredatoidVisionRange)
+                if(obj is Boid)
                 {
-                    foundBoids.Add(boid);
+                    if (Vector2.Distance(Position, obj.Position) <= PredatoidVisionRange)
+                    {
+                        foundBoids.Add((Boid)obj);
+                    }
                 }
             }
             return foundBoids;
+        }
+        public bool Equals(Predatoid other)
+        {
+            return ID == other.ID;
         }
     }
 }

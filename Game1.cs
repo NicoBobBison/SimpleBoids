@@ -15,13 +15,14 @@ namespace BoidsSimulator
         public static readonly Vector2 ScreenMargin = new Vector2(125, 125); // How close boids can get to the screen edge before being pushed inwards
         public static readonly Color BackgroundColor = new Color(50, 53, 89);
 
-        public const int NumberOfBoids = 800;
+        public const int NumberOfBoids = 200;
         public const int NumberOfPredatoids = 2;
         #endregion
 
         // If true, will choose a random boid to debug
         bool _debugBoid = false;
         bool _debugPredatoid = false;
+        int _idCount;
 
         private Texture2D _boidTexture;
         private Texture2D _predatoidTexture;
@@ -29,6 +30,8 @@ namespace BoidsSimulator
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        public static readonly SpatialPartioner Space = new SpatialPartioner((int)Boid.BoidVisionRange, 10000);
+        private List<SceneObject> _sceneObjects = new List<SceneObject>();
         public static readonly List<Boid> AllBoids = new List<Boid>();
         public static readonly List<Predatoid> AllPredatoids = new List<Predatoid>();
 
@@ -73,6 +76,8 @@ namespace BoidsSimulator
             _previousState = _currentState;
             _currentState = Keyboard.GetState();
 
+            Space.Update(_sceneObjects);
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -115,8 +120,7 @@ namespace BoidsSimulator
         {
             AllBoids.Clear();
             AllPredatoids.Clear();
-            Boid.IDCount = 0;
-            Predatoid.IDCount = 0;
+            _idCount = 0;
             SpawnBoids(NumberOfBoids);
             SpawnPredatoids(NumberOfPredatoids);
 
@@ -144,9 +148,10 @@ namespace BoidsSimulator
                 Vector2 randPos = new Vector2(random.Next(0, (int)ScreenSize.X), random.Next(0, (int)ScreenSize.Y));
                 Vector2 randVel = new Vector2(random.Next((int)-Boid.BoidMaxSpeed, (int)Boid.BoidMaxSpeed), random.Next((int)-Boid.BoidMaxSpeed, (int)Boid.BoidMaxSpeed));
                 Boid b = new Boid(_boidTexture, randPos, randVel);
-                b.ID = Boid.IDCount;
+                b.ID = _idCount;
                 AllBoids.Add(b);
-                Boid.IDCount++;
+                _sceneObjects.Add(b);
+                _idCount++;
             }
         }
         void SpawnPredatoids(int numPredatoids)
@@ -158,9 +163,10 @@ namespace BoidsSimulator
                 Vector2 randVel = new Vector2(random.Next((int)-Predatoid.PredatoidMaxSpeed, (int)Predatoid.PredatoidMaxSpeed),
                                               random.Next((int)-Predatoid.PredatoidMaxSpeed, (int)Predatoid.PredatoidMaxSpeed));
                 Predatoid p = new Predatoid(_predatoidTexture, randPos, randVel);
-                p.ID = Predatoid.IDCount;
+                p.ID = _idCount;
                 AllPredatoids.Add(p);
-                Predatoid.IDCount++;
+                _sceneObjects.Add(p);
+                _idCount++;
             }
         }
         Boid GetRandomBoid()
