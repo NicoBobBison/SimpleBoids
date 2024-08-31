@@ -13,7 +13,7 @@ namespace BoidsSimulator
         public static readonly Vector2 ScreenMargin = new Vector2(125, 125); // How close boids can get to the screen edge before being pushed inwards
         public static readonly Color BackgroundColor = new Color(50, 53, 89);
 
-        public const int NumberOfBoids = 800;
+        public const int NumberOfBoids = 1000;
         public const int NumberOfPredatoids = 2;
         #endregion
 
@@ -28,7 +28,7 @@ namespace BoidsSimulator
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        public static readonly SpatialPartioner Space = new SpatialPartioner((int)Boid.BoidVisionRange / 2, 1000);
+        public static readonly SpatialPartioner Space = new SpatialPartioner((int)Boid.BoidVisionRange, 1000);
         private List<SceneObject> _sceneObjects = new List<SceneObject>();
         public static readonly List<Boid> AllBoids = new List<Boid>();
         public static readonly List<Predatoid> AllPredatoids = new List<Predatoid>();
