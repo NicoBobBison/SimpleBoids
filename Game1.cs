@@ -1,10 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace BoidsSimulator
 {
@@ -20,7 +18,7 @@ namespace BoidsSimulator
         #endregion
 
         // If true, will choose a random boid to debug
-        bool _debugBoid = false;
+        bool _debugBoid = true;
         bool _debugPredatoid = false;
         int _idCount;
 
@@ -30,7 +28,7 @@ namespace BoidsSimulator
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        public static readonly SpatialPartioner Space = new SpatialPartioner((int)Boid.BoidVisionRange, 10000);
+        public static readonly SpatialPartioner Space = new SpatialPartioner(20, 1000);
         private List<SceneObject> _sceneObjects = new List<SceneObject>();
         public static readonly List<Boid> AllBoids = new List<Boid>();
         public static readonly List<Predatoid> AllPredatoids = new List<Predatoid>();
@@ -83,13 +81,9 @@ namespace BoidsSimulator
 
             // TODO: Add your update logic here
 
-            foreach(Boid boid in AllBoids)
+            foreach(SceneObject obj in Space.DenseObjects)
             {
-                boid.Update(gameTime);
-            }
-            foreach(Predatoid predatoid in AllPredatoids)
-            {
-                predatoid.Update(gameTime);
+                obj.Update(gameTime);
             }
             if(_currentState.IsKeyDown(Keys.R) && _previousState.IsKeyUp(Keys.R))
             {
@@ -105,13 +99,9 @@ namespace BoidsSimulator
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
-            foreach(Boid boid in AllBoids)
+            foreach(SceneObject obj in Space.DenseObjects)
             {
-                boid.Draw(_spriteBatch);
-            }
-            foreach(Predatoid predatoid in AllPredatoids)
-            {
-                predatoid.Draw(_spriteBatch);
+                obj.Draw(_spriteBatch);
             }
             _spriteBatch.End();
             base.Draw(gameTime);

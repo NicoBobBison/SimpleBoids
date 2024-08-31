@@ -14,7 +14,7 @@ namespace BoidsSimulator
         public SceneObject[] DenseObjects;
 
         int _spacing;
-        int _hashTableSize = 10000;
+        int _hashTableSize = 12497;
 
         /// <summary>
         /// Creates a new spatial partitioner based on spacing (side length of each partition)
@@ -36,7 +36,7 @@ namespace BoidsSimulator
         }
         void Insert(List<SceneObject> objects)
         {
-            int[] cellCount = new int[_hashTableSize + 1];
+            _positionHash = new int[_hashTableSize + 1];
             foreach(SceneObject obj in objects)
             {
                 // Hash each object and increment hash table
@@ -44,13 +44,17 @@ namespace BoidsSimulator
                 int yi = (int)obj.Position.Y / _spacing;
                 int i = Hash(new Vector2(xi, yi));
 
-                cellCount[i]++;
+                _positionHash[i]++;
             }
-            int partialSumCount = 0;
+/*            foreach (int i in _positionHash)
+            {
+                Debug.Write(i + " ");
+            }
+*/            int partialSumCount = 0;
             for(int i = 0; i < _hashTableSize + 1; i++)
             {
-                partialSumCount += cellCount[i];
-                cellCount[i] = partialSumCount;
+                partialSumCount += _positionHash[i];
+                _positionHash[i] = partialSumCount;
             }
             foreach(SceneObject obj in objects)
             {
@@ -58,17 +62,44 @@ namespace BoidsSimulator
                 int yi = (int)obj.Position.Y / _spacing;
                 int i = Hash(new Vector2(xi, yi));
 
-                int denseIndex = cellCount[i];
+                int denseIndex = _positionHash[i];
                 DenseObjects[denseIndex - 1] = obj;
-                cellCount[i]--;
+                _positionHash[i]--;
             }
+            
         }
         public List<SceneObject> QueryNearbyObjects(Vector2 pos, float range)
         {
             List<SceneObject> foundObjects = new List<SceneObject>();
 
+            // Start at upper right of grid to find squares
+            Vector2 initSquarePos = new Vector2(pos.X - range, pos.Y - range);
+            Vector2 squarePos = initSquarePos;
 
+            while(squarePos.Y < pos.Y + 2 * range)
+            {
+                while(squarePos.X < pos.X + 2 * range)
+                {
+                    // Hash the points in those squares to get the indeces to check for
 
+                    int xi = (int)squarePos.X / _spacing;
+                    int yi = (int)squarePos.Y / _spacing;
+                    int i = Hash(new Vector2(xi, yi));
+
+                    int numObjects = _positionHash[i+1] - _positionHash[i];
+                    if (numObjects > 0)
+                    {
+                        // TODO: Figure out why this always finds waaaaaaaay more objects than it should
+                        for(int denseIndex = _positionHash[i]; denseIndex < numObjects; denseIndex++)
+                        {
+                            foundObjects.Add(DenseObjects[denseIndex]);
+                        }
+                    }
+                    squarePos.X += _spacing;
+                }
+                squarePos.X = initSquarePos.X;
+                squarePos.Y += _spacing;
+            }
             return foundObjects;
         }
         // Credit: Ten minute physics

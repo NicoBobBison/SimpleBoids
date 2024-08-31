@@ -48,7 +48,7 @@ namespace BoidsSimulator
             Velocity = initialVelocity;
             Position = position;
         }
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             // TODO: Figure out when I actually have to multiply by delta time
             _acceleration = RecalculateAcceleration() * BoidMaxAcceleration;
@@ -60,7 +60,7 @@ namespace BoidsSimulator
             Velocity += _acceleration * Helper.GetDeltaTime(gameTime);
             Position += Velocity * Helper.GetDeltaTime(gameTime);
         }
-        public void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(_texture, Position, null, _color, Helper.GetRotationAroundZero(Velocity) + Helper.DegToRad(90f),
                 new Vector2(_texture.Width / 2, _texture.Height / 2), 1.0f, SpriteEffects.None, 0);
@@ -219,8 +219,12 @@ namespace BoidsSimulator
         }
         List<Boid> GetBoidsWithinVisionRange()
         {
+            if (VisionDebug)
+            {
+                Debug.WriteLine(Game1.Space.QueryNearbyObjects(Position, BoidVisionRange).Count);
+            }
             List<Boid> foundBoids = new List<Boid>();
-            foreach(SceneObject obj in Game1.Space.DenseObjects)
+            foreach(SceneObject obj in Game1.Space.QueryNearbyObjects(Position, BoidVisionRange))
             {
                 if (obj is Boid)
                 {
@@ -235,7 +239,7 @@ namespace BoidsSimulator
         List<Predatoid> GetPredatoidsWithinVisionRange()
         {
             List<Predatoid> foundPred = new List<Predatoid>();
-            foreach (SceneObject obj in Game1.Space.DenseObjects)
+            foreach (SceneObject obj in Game1.Space.QueryNearbyObjects(Position, BoidVisionRange))
             {
                 if(obj is Predatoid)
                 {
