@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace BoidsSimulator
 {
     /// <summary>
-    /// Adds acceleration requests and magnitudes together until reaching the maximum value
+    /// Adds acceleration requests and magnitudes together until reaching the maximum magnitude value, then caps the acceleration at that magnitude.
     /// </summary>
     internal class AcceleratorAccumulator
     {

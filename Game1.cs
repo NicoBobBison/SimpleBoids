@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace BoidsSimulator
 {
@@ -13,11 +14,12 @@ namespace BoidsSimulator
         public static readonly Vector2 ScreenMargin = new Vector2(125, 125); // How close boids can get to the screen edge before being pushed inwards
         public static readonly Color BackgroundColor = new Color(50, 53, 89);
 
+        // Number of boids/predatoids to spawn
         public const int NumberOfBoids = 700;
         public const int NumberOfPredatoids = 1;
         #endregion
 
-        // If true, will choose a random boid to debug
+        // If true, will choose a random boid/predatoid to debug
         bool _debugBoid = false;
         bool _debugPredatoid = false;
         int _idCount;
@@ -28,8 +30,12 @@ namespace BoidsSimulator
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        public static readonly SpatialPartioner Space = new SpatialPartioner((int)Boid.BoidVisionRange, 1000);
+        public static readonly SpatialPartioner Space = new SpatialPartioner((int)Boid.BoidVisionRange, 3 * NumberOfBoids);
         private List<SceneObject> _sceneObjects = new List<SceneObject>();
+
+        // Since there are usually only a few predatoids, it's faster to just check them via brute force
+        public static readonly List<Predatoid> AllPredatoids = new List<Predatoid>();
+        public const int MaxPredatoidsToBruteForce = 10; // If there are more predatoids than this, use spatial partitioning instead
 
         private KeyboardState _currentState;
         private KeyboardState _previousState;
@@ -77,8 +83,6 @@ namespace BoidsSimulator
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
-
             foreach(SceneObject obj in Space.DenseObjects)
             {
                 obj.Update(gameTime);
@@ -95,7 +99,6 @@ namespace BoidsSimulator
         {
             GraphicsDevice.Clear(BackgroundColor);
 
-            // TODO: Add your drawing code here
             _spriteBatch.Begin();
             foreach(SceneObject obj in Space.DenseObjects)
             {
@@ -106,11 +109,16 @@ namespace BoidsSimulator
         }
         void RestartSimulation()
         {
+            _sceneObjects.Clear();
+            Space.Clear();
+
             _idCount = 0;
             SpawnBoids(NumberOfBoids);
             SpawnPredatoids(NumberOfPredatoids);
 
-            if (_debugBoid)
+            Space.Update(_sceneObjects);
+
+            if (_debugBoid && NumberOfBoids > 0)
             {
                 Boid debuggedBoid = GetRandomBoid();
                 debuggedBoid.VisionDebug = true;
@@ -118,7 +126,7 @@ namespace BoidsSimulator
                 debuggedBoid.AlignmentDebug = true;
                 debuggedBoid.CohesionDebug = true;
             }
-            if (_debugPredatoid)
+            if (_debugPredatoid && NumberOfPredatoids > 0)
             {
                 Predatoid debuggedPredatoid = GetRandomPredatoid();
                 debuggedPredatoid.VisionDebug = true;
@@ -150,6 +158,7 @@ namespace BoidsSimulator
                 Predatoid p = new Predatoid(_predatoidTexture, randPos, randVel);
                 p.ID = _idCount;
                 _sceneObjects.Add(p);
+                AllPredatoids.Add(p);
                 _idCount++;
             }
         }
@@ -168,6 +177,7 @@ namespace BoidsSimulator
         }
         Predatoid GetRandomPredatoid()
         {
+            Debug.WriteLine(Space.DenseObjects == null);
             foreach (SceneObject obj in Space.DenseObjects)
             {
                 if (obj is Predatoid)

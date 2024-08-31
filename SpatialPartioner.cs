@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.Xna.Framework;
 
 namespace BoidsSimulator
@@ -26,6 +27,11 @@ namespace BoidsSimulator
         {
             _spacing = spacing;
             _hashTableSize = hashTableSize;
+        }
+        public void Clear()
+        {
+            _densityIndexHash = _densityIndexHash = new int[_hashTableSize + 1];
+            DenseObjects = Array.Empty<SceneObject>();
         }
         public void Update(List<SceneObject> objects)
         {
@@ -88,8 +94,6 @@ namespace BoidsSimulator
                     int numObjects = _densityIndexHash[i+1] - _densityIndexHash[i];
                     if (numObjects > 0)
                     {
-                        //Debug.WriteLine(numObjects);
-                        // TODO: Figure out why this always finds waaaaaaaay more objects than it should
                         for(int denseIndex = _densityIndexHash[i]; denseIndex < _densityIndexHash[i] + numObjects; denseIndex++)
                         {
                             foundObjects.Add(DenseObjects[denseIndex]);
@@ -102,7 +106,7 @@ namespace BoidsSimulator
             }
             return foundObjects;
         }
-        // Credit: Ten minute physics
+        // Credit for hash function: Ten minute physics
         int Hash(Vector2 pos)
         {
             // Integers are arbitrary large prime numbers. Goal is to get a pseudo random hash based on position

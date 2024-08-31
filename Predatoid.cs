@@ -138,18 +138,35 @@ namespace BoidsSimulator
         }
         List<Predatoid> GetPredatoidsWithinVisionRange()
         {
-            List<Predatoid> foundPredatoids = new List<Predatoid>();
-            foreach (SceneObject obj in Game1.Space.QueryNearbyObjects(Position, PredatoidVisionRange))
+            // Disable warning for unreachable code, since this code varies based on constants the user can set in the Game1 class
+#pragma warning disable CS0162
+            List<Predatoid> foundPred = new List<Predatoid>();
+            // Use brute force
+            if (Game1.NumberOfPredatoids <= Game1.MaxPredatoidsToBruteForce)
             {
-                if(obj is Predatoid)
+                foreach (SceneObject obj in Game1.AllPredatoids)
                 {
                     if (Vector2.Distance(Position, obj.Position) <= PredatoidVisionRange)
                     {
-                        foundPredatoids.Add((Predatoid)obj);
+                        foundPred.Add((Predatoid)obj);
                     }
                 }
             }
-            return foundPredatoids;
+            else // Use spatial partitioning
+            {
+                foreach (SceneObject obj in Game1.Space.QueryNearbyObjects(Position, PredatoidVisionRange))
+                {
+                    if (obj is Predatoid)
+                    {
+                        if (Vector2.Distance(Position, obj.Position) <= PredatoidVisionRange)
+                        {
+                            foundPred.Add((Predatoid)obj);
+                        }
+                    }
+                }
+            }
+            return foundPred;
+#pragma warning restore CS0162
         }
         List<Boid> GetBoidsWithinVisionRange()
         {

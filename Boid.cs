@@ -15,7 +15,7 @@ namespace BoidsSimulator
     public class Boid : SceneObject, IEquatable<Boid>
     {
         #region Constants
-        public const float BoidVisionRange = 110f;
+        public const float BoidVisionRange = 100f;
         public const float BoidFleeMultiplier = 1f;
         public const float BoidSeparationRange = 25f;
         public const float BoidSeparationMultiplier = 0.15f;
@@ -219,11 +219,7 @@ namespace BoidsSimulator
         }
         List<Boid> GetBoidsWithinVisionRange()
         {
-/*            if (VisionDebug)
-            {
-                Debug.WriteLine(Game1.Space.QueryNearbyObjects(Position, BoidVisionRange).Count);
-            }
-*/            List<Boid> foundBoids = new List<Boid>();
+            List<Boid> foundBoids = new List<Boid>();
             foreach(SceneObject obj in Game1.Space.QueryNearbyObjects(Position, BoidVisionRange))
             {
                 if (obj is Boid)
@@ -238,10 +234,13 @@ namespace BoidsSimulator
         }
         List<Predatoid> GetPredatoidsWithinVisionRange()
         {
+            // Disable warning for unreachable code, since this code varies based on constants the user can set in the Game1 class
+#pragma warning disable CS0162
             List<Predatoid> foundPred = new List<Predatoid>();
-            foreach (SceneObject obj in Game1.Space.QueryNearbyObjects(Position, BoidVisionRange))
+            // Use brute force
+            if (Game1.NumberOfPredatoids <= Game1.MaxPredatoidsToBruteForce)
             {
-                if(obj is Predatoid)
+                foreach (SceneObject obj in Game1.AllPredatoids)
                 {
                     if (Vector2.Distance(Position, obj.Position) <= BoidVisionRange)
                     {
@@ -249,7 +248,21 @@ namespace BoidsSimulator
                     }
                 }
             }
+            else // Use spatial partitioning
+            {
+                foreach (SceneObject obj in Game1.Space.QueryNearbyObjects(Position, BoidVisionRange))
+                {
+                    if (obj is Predatoid)
+                    {
+                        if (Vector2.Distance(Position, obj.Position) <= BoidVisionRange)
+                        {
+                            foundPred.Add((Predatoid)obj);
+                        }
+                    }
+                }
+            }
             return foundPred;
+#pragma warning restore CS0162
         }
         public bool Equals(Boid other)
         {
