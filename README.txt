@@ -11,7 +11,9 @@ DESCRIPTION:
 
 
 TO RUN:
-	
+	1. Download/clone this repository.
+	2. Open the "Builds" folder.
+	3. Run the exe.
 
 
 CONTROLS:
