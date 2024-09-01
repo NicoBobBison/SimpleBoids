@@ -15,7 +15,7 @@ namespace BoidsSimulator.Main
         public SceneObject[] DenseObjects;
 
         int _spacing;
-        int _hashTableSize = 12497;
+        int _hashTableSize = 1000;
 
         /// <summary>
         /// Creates a new spatial partitioner based on spacing (side length of each partition)
