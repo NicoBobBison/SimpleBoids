@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoidsSimulator", "BoidsSimulator.csproj", "{812BE673-D1A1-402C-8DAE-FB4B55020A0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleBoids", "SimpleBoids.csproj", "{812BE673-D1A1-402C-8DAE-FB4B55020A0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
