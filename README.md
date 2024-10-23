@@ -1,4 +1,5 @@
 # Simple Boids by NicoBobBison
+![A swarm of boids being chased by a predator](screenshots/main.png)
 
 ## Description
 Simple Boids is a minimalistic game that simulates the flocking behavior of birds using the algorithm described in Craig Reynolds' 1987 paper "Flocks, Herds, and Schools: A Distributed Behavioral Model". By adjusting parameters like alignment, cohesion, and separation (configurable in Boid.cs and Predatoid.cs), users can observe and alter how these bird-like objects collectively exhibit realistic flocking dynamics.
